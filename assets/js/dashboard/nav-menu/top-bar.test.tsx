@@ -10,6 +10,7 @@ import userEvent from '@testing-library/user-event'
 import { TestContextProviders } from '../../../test-utils/app-context-providers'
 import { TopBar } from './top-bar'
 import { MockAPI } from '../../../test-utils/mock-api'
+import { apiPath } from '../util/url'
 import {
   mockAnimationsApi,
   mockResizeObserver,
@@ -53,6 +54,17 @@ test('user can open and close site switcher', async () => {
   })
 
   const toggleSiteSwitcher = screen.getByRole('button', { name: domain })
+  expect(toggleSiteSwitcher.querySelector('img')).toHaveAttribute(
+    'src',
+    '/favicon/sources/dummy.site'
+  )
+
+  fireEvent.error(toggleSiteSwitcher.querySelector('img')!)
+  expect(toggleSiteSwitcher.querySelector('img')).toHaveAttribute(
+    'src',
+    '/favicon/sources/dummy.site'
+  )
+
   await userEvent.click(toggleSiteSwitcher)
   expect(
     screen
@@ -124,7 +136,7 @@ test('user can open and close filters dropdown', async () => {
 })
 
 test('current visitors renders when visitors are present and disappears after visitors are null', async () => {
-  mockAPI.get(`/api/stats/${domain}/current-visitors`, 500)
+  mockAPI.get(apiPath({ domain }, '/current-visitors'), 500)
   render(<TopBar showCurrentVisitors={true} />, {
     wrapper: (props) => (
       <TestContextProviders siteOptions={{ domain }} {...props} />
@@ -137,7 +149,7 @@ test('current visitors renders when visitors are present and disappears after vi
     ).toBeVisible()
   })
 
-  mockAPI.get(`/api/stats/${domain}/current-visitors`, null)
+  mockAPI.get(apiPath({ domain }, '/current-visitors'), null)
   fireEvent(document, new CustomEvent('tick'))
   await waitForElementToBeRemoved(() =>
     screen.queryByRole('link', { name: /current visitors/ })

@@ -56,6 +56,12 @@ defmodule Plausible.Application do
           n_lock_partitions: 1,
           ets_options: [read_concurrency: true, write_concurrency: true]
         ),
+        Plausible.Cache.Adapter.child_spec(:favicon, :cache_favicon,
+          ttl_check_interval: :timer.minutes(5),
+          global_ttl: :timer.hours(24),
+          n_lock_partitions: 1,
+          ets_options: [read_concurrency: true, write_concurrency: true]
+        ),
         Plausible.Cache.Adapter.child_specs(:sessions, :cache_sessions,
           ttl_check_interval: :timer.seconds(10),
           global_ttl: :timer.minutes(30),
