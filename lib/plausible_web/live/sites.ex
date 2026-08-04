@@ -815,17 +815,27 @@ defmodule PlausibleWeb.Live.Sites do
       assign(assigns,
         light_src:
           PlausibleWeb.URL.path(
-            "favicon/sources/#{assigns.domain}?placeholder=site&ui-mode=light"
+            "favicon/sources/#{URI.encode_www_form(assigns.domain)}?placeholder=site&ui-mode=light"
           ),
         dark_src:
           PlausibleWeb.URL.path(
-            "favicon/sources/#{assigns.domain}?placeholder=site&ui-mode=dark"
+            "favicon/sources/#{URI.encode_www_form(assigns.domain)}?placeholder=site&ui-mode=dark"
           )
       )
 
     ~H"""
-    <img src={@light_src} alt="" class="shrink-0 size-6 rounded-md dark:hidden" />
-    <img src={@dark_src} alt="" class="shrink-0 size-6 rounded-md hidden dark:block" />
+    <img
+      src={@light_src}
+      alt=""
+      class="shrink-0 size-6 rounded-md dark:hidden"
+      referrerpolicy="no-referrer"
+    />
+    <img
+      src={@dark_src}
+      alt=""
+      class="shrink-0 size-6 rounded-md hidden dark:block"
+      referrerpolicy="no-referrer"
+    />
     """
   end
 
