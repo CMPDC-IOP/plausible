@@ -1,8 +1,27 @@
 defmodule PlausibleWeb.Favicon do
   @referer_domains_file "priv/referer_favicon_domains.json"
+  @cache_name :favicon
+  @fallback_favicon_paths ~w(favicon.ico favicon.png)
+  @success_ttl :timer.hours(24)
+  @negative_ttl :timer.hours(1)
+  @max_favicon_size 2_000_000
+  @max_favicon_sources 5
+  @fetch_timeout 5_000
+  @default_content_type "image/x-icon"
+  @browser_cache_control "no-store"
+  @placeholder_cache_control "public, max-age=2592000"
+
   @moduledoc """
-  A Plug that fetches favicon images from DuckDuckGo and returns them
-  to the Plausible frontend.
+  A Plug that resolves favicon images and returns them to the Plausible frontend.
+
+  Site pages are inspected for a declared favicon before checking the conventional
+  `favicon.ico` and `favicon.png` paths and falling back to DuckDuckGo. Resolved
+  responses are cached internally so the server does not repeat external probes
+  on every page load. Browser caching is disabled so fixes take effect without
+  manually versioning the endpoint URL.
+
+  A failed lookup returns the placeholder with `no-store`, so a transient failure is
+  retried on the next page load instead of being pinned by the browser.
 
   The proxying is there so we can reduce the number of third-party domains that
   the browser clients need to connect to. Our goal is to have 0 third-party domain
@@ -73,13 +92,18 @@ defmodule PlausibleWeb.Favicon do
       |> Jason.decode!()
       |> Map.merge(@custom_icons)
 
-    [favicon_domains: domains]
+    [
+      favicon_domains: domains,
+      favicon_fetcher: &__MODULE__.default_fetcher/1,
+      trusted_hosts: :runtime,
+      cache_name: @cache_name
+    ]
   end
 
   @ddg_broken_icon <<137, 80, 78, 71, 13, 10, 26, 10>>
   @doc """
-  Proxies HTTP request to DuckDuckGo favicon service. Swallows hop-by-hop HTTP
-  headers that should not be forwarded as defined in [RFC 2616](https://www.rfc-editor.org/rfc/rfc2616#section-13.5.1)
+  Resolves a favicon from the configured site path and then the DuckDuckGo
+  favicon service.
 
   ## Placeholder
 
@@ -127,31 +151,41 @@ defmodule PlausibleWeb.Favicon do
     use `<img src="https://plausible.io/favicon/sources/dummy.site"></img>`
 
   """
-  def call(conn, favicon_domains: favicon_domains) do
+  def call(conn, opts) do
+    favicon_domains = Keyword.fetch!(opts, :favicon_domains)
+    favicon_fetcher = Keyword.get(opts, :favicon_fetcher, &__MODULE__.default_fetcher/1)
+
+    trusted_favicon_fetcher =
+      Keyword.get(opts, :trusted_favicon_fetcher, &__MODULE__.trusted_get/2)
+
+    trusted_hosts =
+      case Keyword.get(opts, :trusted_hosts, :runtime) do
+        :runtime ->
+          Application.get_env(:plausible, __MODULE__, []) |> Keyword.get(:trusted_hosts, [])
+
+        trusted_hosts ->
+          trusted_hosts
+      end
+
+    cache_name = Keyword.get(opts, :cache_name, @cache_name)
+
     case conn.request_path do
       "/favicon/placeholders/" <> name ->
-        send_placeholder(conn, name)
+        send_placeholder(conn, name, @placeholder_cache_control)
 
       "/favicon/sources/" <> domain ->
         domain = URI.decode_www_form(domain)
 
-        domain =
-          Map.get(favicon_domains, domain, domain)
-          |> String.split("/", parts: 2)
-          |> hd()
-
-        case HTTPClient.impl().get("https://icons.duckduckgo.com/ip3/#{domain}.ico") do
-          {:ok, %Finch.Response{status: 200, body: body, headers: headers}}
-          when body != @ddg_broken_icon ->
-            conn
-            |> forward_headers(headers)
-            |> maybe_override_content_type(body)
-            |> prevent_javascript_execution()
-            |> send_resp(200, body)
-            |> halt()
-
-          _ ->
-            send_placeholder(conn)
+        case cached_favicon(
+               domain,
+               favicon_domains,
+               favicon_fetcher,
+               trusted_favicon_fetcher,
+               trusted_hosts,
+               cache_name
+             ) do
+          nil -> send_placeholder(conn, nil, @browser_cache_control)
+          response -> send_favicon(response, conn)
         end
 
       _ ->
@@ -159,13 +193,13 @@ defmodule PlausibleWeb.Favicon do
     end
   end
 
-  defp send_placeholder(conn, name \\ nil) do
+  defp send_placeholder(conn, name, cache_control) do
     conn = fetch_query_params(conn)
     name = name || conn.query_params["placeholder"]
 
     conn
     |> put_resp_content_type("image/svg+xml")
-    |> put_resp_header("cache-control", "public, max-age=2592000")
+    |> put_resp_header("cache-control", cache_control)
     |> send_resp(200, placeholder_icon(name, conn.query_params["ui-mode"]))
     |> halt
   end
@@ -175,18 +209,246 @@ defmodule PlausibleWeb.Favicon do
   defp placeholder_icon(_source, "dark"), do: @source_dark_placeholder_icon
   defp placeholder_icon(_source, _ui_mode), do: @source_placeholder_icon
 
-  @forwarded_headers ["content-type", "cache-control", "expires"]
-  defp forward_headers(%Plug.Conn{} = conn, headers) do
-    headers_to_forward = Enum.filter(headers, fn {k, _} -> k in @forwarded_headers end)
-    %Plug.Conn{conn | resp_headers: headers_to_forward}
+  defp cached_favicon(
+         domain,
+         favicon_domains,
+         favicon_fetcher,
+         trusted_favicon_fetcher,
+         trusted_hosts,
+         cache_name
+       ) do
+    source_domain = Map.get(favicon_domains, domain, domain)
+
+    resolver = fn ->
+      resolve_favicon(source_domain, favicon_fetcher, trusted_favicon_fetcher, trusted_hosts)
+    end
+
+    if cache_available?(cache_name) do
+      Plausible.Cache.Adapter.get(cache_name, source_domain, fn ->
+        case resolver.() do
+          nil -> %ConCache.Item{value: nil, ttl: @negative_ttl}
+          response -> %ConCache.Item{value: response, ttl: response.ttl}
+        end
+      end)
+    else
+      resolver.()
+    end
   end
 
-  defp maybe_override_content_type(conn, "<svg" <> _rest) do
-    conn |> put_resp_content_type("image/svg+xml")
+  defp cache_available?(cache_name) when is_atom(cache_name),
+    do: is_pid(Process.whereis(cache_name))
+
+  defp cache_available?(_cache_name), do: false
+
+  defp resolve_favicon(domain, favicon_fetcher, trusted_favicon_fetcher, trusted_hosts) do
+    case site_uri(domain) do
+      %URI{host: host} = uri when is_binary(host) ->
+        host = String.downcase(host)
+
+        fetcher =
+          if host in trusted_hosts do
+            fn url -> trusted_favicon_fetcher.(url, host) end
+          else
+            favicon_fetcher
+          end
+
+        discover_favicon(uri, fetcher) || fetch_duckduckgo_favicon(domain)
+
+      _ ->
+        fetch_duckduckgo_favicon(domain)
+    end
   end
 
-  defp maybe_override_content_type(conn, _), do: conn
+  defp discover_favicon(uri, fetcher) do
+    page_uri = page_uri(uri)
 
+    declared_sources =
+      page_uri
+      |> page_favicon_sources(fetcher)
+      |> Enum.uniq()
+      |> Enum.take(@max_favicon_sources)
+
+    (declared_sources ++ fallback_favicon_sources(uri))
+    |> Enum.uniq()
+    |> Enum.find_value(&fetch_favicon(&1, fetcher))
+  end
+
+  defp page_favicon_sources(page_uri, fetcher) do
+    case fetcher.(URI.to_string(page_uri)) do
+      {:ok, %Req.Response{status: status, body: body} = response}
+      when status in 200..299 and is_binary(body) and byte_size(body) <= @max_favicon_size ->
+        if html_response?(response) do
+          body
+          |> LazyHTML.from_document()
+          |> LazyHTML.query("link[rel][href]")
+          |> Enum.filter(&icon_link?/1)
+          |> Enum.flat_map(&LazyHTML.attribute(&1, "href"))
+          |> Enum.map(&same_host_https_url(page_uri, &1))
+          |> Enum.reject(&is_nil/1)
+        else
+          []
+        end
+
+      _ ->
+        []
+    end
+  rescue
+    _ -> []
+  end
+
+  defp icon_link?(link) do
+    link
+    |> LazyHTML.attribute("rel")
+    |> Enum.any?(fn rel ->
+      rel
+      |> String.downcase()
+      |> String.split()
+      |> Enum.member?("icon")
+    end)
+  end
+
+  defp same_host_https_url(page_uri, href) do
+    uri = URI.merge(page_uri, href)
+
+    if uri.scheme == "https" and String.downcase(uri.host || "") == String.downcase(page_uri.host) and
+         uri.port in [nil, 443] do
+      URI.to_string(%{uri | fragment: nil})
+    end
+  rescue
+    _ -> nil
+  end
+
+  defp fallback_favicon_sources(%URI{host: host, path: path}) do
+    path = String.trim_trailing(path || "", "/")
+    prefixes = if path == "", do: [""], else: [path, ""]
+
+    for prefix <- prefixes, favicon_path <- @fallback_favicon_paths do
+      "https://#{host}#{prefix}/#{favicon_path}"
+    end
+  end
+
+  defp fetch_favicon(url, fetcher) do
+    case fetcher.(url) do
+      {:ok, %Req.Response{status: status, body: body} = response}
+      when status in 200..299 and is_binary(body) ->
+        if valid_favicon?(response, body) do
+          content_type = response_content_type(response)
+
+          %{
+            body: body,
+            content_type: content_type,
+            ttl: @success_ttl
+          }
+        end
+
+      _ ->
+        nil
+    end
+  rescue
+    _ -> nil
+  end
+
+  defp valid_favicon?(response, body) do
+    byte_size(body) > 0 and byte_size(body) <= @max_favicon_size and
+      case Req.Response.get_header(response, "content-type") do
+        [] -> true
+        [content_type | _] -> String.starts_with?(String.downcase(content_type), "image/")
+      end
+  end
+
+  defp html_response?(response) do
+    case Req.Response.get_header(response, "content-type") do
+      [] -> true
+      headers -> Enum.any?(headers, &String.starts_with?(String.downcase(&1), "text/html"))
+    end
+  end
+
+  defp site_uri(domain) do
+    case URI.parse("https://#{domain}") do
+      %URI{scheme: "https", host: host, port: port} = uri
+      when is_binary(host) and host != "" and port in [nil, 443] ->
+        %{uri | query: nil, fragment: nil}
+
+      _ ->
+        nil
+    end
+  end
+
+  defp page_uri(uri) do
+    path = uri.path || ""
+    path = if path == "" or String.ends_with?(path, "/"), do: path, else: path <> "/"
+    %{uri | path: path}
+  end
+
+  @doc false
+  def default_fetcher(url) do
+    Plausible.SSRF.get(url,
+      receive_timeout: @fetch_timeout,
+      max_body_length: @max_favicon_size
+    )
+  end
+
+  @doc false
+  def trusted_get(url, trusted_host) do
+    Plausible.SSRF.get(url,
+      trusted_hosts: [trusted_host],
+      receive_timeout: @fetch_timeout,
+      max_body_length: @max_favicon_size
+    )
+  end
+
+  defp fetch_duckduckgo_favicon(domain) do
+    hostname = domain |> String.split("/", parts: 2) |> hd()
+
+    case HTTPClient.impl().get("https://icons.duckduckgo.com/ip3/#{hostname}.ico") do
+      {:ok, %Finch.Response{status: 200, body: body, headers: headers}}
+      when is_binary(body) and body != @ddg_broken_icon ->
+        content_type = ddg_content_type(body, headers)
+
+        %{
+          body: body,
+          content_type: content_type,
+          ttl: @success_ttl
+        }
+
+      _ ->
+        nil
+    end
+  end
+
+  defp response_content_type(response) do
+    case Req.Response.get_header(response, "content-type") do
+      [content_type | _] -> content_type
+      [] -> @default_content_type
+    end
+  end
+
+  defp ddg_content_type(body, headers) do
+    content_type = header_value(headers, "content-type") || @default_content_type
+
+    if String.starts_with?(body, "<svg"),
+      do: "image/svg+xml; charset=utf-8",
+      else: content_type
+  end
+
+  defp header_value(headers, name) do
+    Enum.find_value(headers, fn {key, value} ->
+      if String.downcase(key) == name, do: value
+    end)
+  end
+
+  defp send_favicon(response, conn) do
+    conn
+    |> put_resp_header("content-type", response.content_type)
+    |> put_resp_header("cache-control", @browser_cache_control)
+    |> put_resp_header("x-content-type-options", "nosniff")
+    |> prevent_javascript_execution()
+    |> send_resp(200, response.body)
+    |> halt()
+  end
+
+  # Favicons are attacker-controlled bytes served from our origin: never let the
+  # browser execute them as a document, and never let it sniff a different type.
   defp prevent_javascript_execution(conn) do
     conn
     |> put_resp_header("content-security-policy", "script-src 'none'")

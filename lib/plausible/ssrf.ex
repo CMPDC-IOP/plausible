@@ -1,7 +1,8 @@
 defmodule Plausible.SSRF do
   @moduledoc """
   Guards outbound HTTP requests and DNS lookups against customer-supplied
-  hostnames reaching internal, private or local network space
+  hostnames reaching internal, private or local network space. Callers may
+  explicitly trust exact HTTPS hosts; redirects remain restricted to that list.
   """
 
   @type error_reason ::
@@ -9,6 +10,7 @@ defmodule Plausible.SSRF do
           | :invalid_host
           | :dns_resolution_failed
           | :restricted_address
+          | :response_too_large
           | :too_many_redirects
 
   @redirect_statuses [301, 302, 303, 307, 308]
@@ -48,15 +50,34 @@ defmodule Plausible.SSRF do
   @spec get(String.t(), keyword()) ::
           {:ok, Req.Response.t()} | {:error, error_reason() | Exception.t()}
   def get(url, opts \\ []) do
-    max_redirects = Keyword.get(opts, :max_redirects, @default_max_redirects)
-    request(url, opts, max_redirects)
+    {max_redirects, opts} = Keyword.pop(opts, :max_redirects, @default_max_redirects)
+    {trusted_hosts, opts} = Keyword.pop(opts, :trusted_hosts, [])
+    request(url, opts, max_redirects, Enum.map(trusted_hosts, &String.downcase/1))
   end
 
-  defp request(url, opts, redirects_left) do
+  defp request(url, opts, redirects_left, trusted_hosts) do
     with {:ok, uri} <- parse_url(url),
-         {:ok, ips} <- resolve_host(uri.host),
+         :ok <- validate_trusted_uri(uri, trusted_hosts),
+         {:ok, ips} <- resolve_request_host(uri.host, trusted_hosts),
          {:ok, resp} <- do_request(uri, hd(ips), opts) do
-      handle_response(resp, uri, opts, redirects_left)
+      handle_response(resp, uri, opts, redirects_left, trusted_hosts)
+    end
+  end
+
+  defp validate_trusted_uri(_uri, []), do: :ok
+  defp validate_trusted_uri(%URI{scheme: "https"}, _trusted_hosts), do: :ok
+  defp validate_trusted_uri(_uri, _trusted_hosts), do: {:error, :invalid_url}
+
+  defp resolve_request_host(host, []), do: resolve_host(host)
+
+  defp resolve_request_host(host, trusted_hosts) do
+    if String.downcase(host) in trusted_hosts do
+      case dns_lookup(host) do
+        [] -> {:error, :dns_resolution_failed}
+        ips -> {:ok, ips}
+      end
+    else
+      {:error, :restricted_address}
     end
   end
 
@@ -72,6 +93,8 @@ defmodule Plausible.SSRF do
   end
 
   defp do_request(uri, ip, opts) do
+    {max_body_length, opts} = Keyword.pop(opts, :max_body_length)
+
     host = uri.host
     pinned_url = %{uri | host: ip |> :inet.ntoa() |> to_string()}
 
@@ -84,15 +107,46 @@ defmodule Plausible.SSRF do
         redirect: false
       )
 
-    Req.request(request_opts)
+    request_opts =
+      if max_body_length do
+        Keyword.put(request_opts, :into, &read_body(&1, &2, max_body_length, 0))
+      else
+        request_opts
+      end
+
+    case Req.request(request_opts) do
+      {:ok, %Req.Response{body: {:body_too_large, _size}}} -> {:error, :response_too_large}
+      result -> result
+    end
   end
 
-  defp handle_response(%Req.Response{status: status} = resp, uri, opts, redirects_left)
+  # Reads the body incrementally so a hostile server cannot make us buffer an
+  # arbitrarily large response. Req handles status/headers itself when `:into`
+  # is a function, so only data messages reach this callback.
+  defp read_body({:data, data}, {req, resp}, max_body_length, size) do
+    size = size + byte_size(data)
+
+    if size > max_body_length do
+      {:halt, {req, %{resp | body: {:body_too_large, size}}}}
+    else
+      {:cont, {req, %{resp | body: resp.body <> data}}}
+    end
+  end
+
+  defp read_body(_message, acc, _max_body_length, _size), do: {:cont, acc}
+
+  defp handle_response(
+         %Req.Response{status: status} = resp,
+         uri,
+         opts,
+         redirects_left,
+         trusted_hosts
+       )
        when status in @redirect_statuses do
     case Req.Response.get_header(resp, "location") do
       [location | _] when redirects_left > 0 ->
         next_url = uri |> URI.merge(location) |> URI.to_string()
-        request(next_url, opts, redirects_left - 1)
+        request(next_url, opts, redirects_left - 1, trusted_hosts)
 
       [_ | _] ->
         {:error, :too_many_redirects}
@@ -102,7 +156,7 @@ defmodule Plausible.SSRF do
     end
   end
 
-  defp handle_response(resp, _uri, _opts, _redirects_left), do: {:ok, resp}
+  defp handle_response(resp, _uri, _opts, _redirects_left, _trusted_hosts), do: {:ok, resp}
 
   defp dns_lookup(host) do
     charlist_host = to_charlist(host)

@@ -90,6 +90,31 @@ defmodule Plausible.SSRFTest do
                SSRF.get("http://good.example/", plug: {Req.Test, __MODULE__})
     end
 
+    test "stops reading a body that exceeds max_body_length" do
+      expect_no_dns_lookup()
+
+      Req.Test.stub(__MODULE__, fn conn ->
+        Plug.Conn.send_resp(conn, 200, String.duplicate("a", 1_000))
+      end)
+
+      assert SSRF.get("http://93.184.216.34/",
+               plug: {Req.Test, __MODULE__},
+               max_body_length: 100
+             ) == {:error, :response_too_large}
+    end
+
+    test "returns a body that fits within max_body_length" do
+      expect_no_dns_lookup()
+
+      Req.Test.stub(__MODULE__, fn conn -> Plug.Conn.send_resp(conn, 200, "ok") end)
+
+      assert {:ok, %Req.Response{status: 200, body: "ok"}} =
+               SSRF.get("http://93.184.216.34/",
+                 plug: {Req.Test, __MODULE__},
+                 max_body_length: 100
+               )
+    end
+
     test "rejects a host whose DNS answer is a private address, without ever reaching the plug" do
       stub_dns(%{"evil.example" => {[{127, 0, 0, 1}], []}})
 
@@ -99,6 +124,46 @@ defmodule Plausible.SSRFTest do
 
       assert SSRF.get("http://evil.example/", plug: {Req.Test, __MODULE__}) ==
                {:error, :restricted_address}
+    end
+
+    test "fetches an explicitly trusted private HTTPS host" do
+      stub_dns(%{"internal.example" => {[{127, 0, 0, 1}], []}})
+
+      Req.Test.stub(__MODULE__, fn conn ->
+        assert {"host", "internal.example"} in conn.req_headers
+        Plug.Conn.send_resp(conn, 200, "private response")
+      end)
+
+      assert {:ok, %Req.Response{status: 200, body: "private response"}} =
+               SSRF.get("https://internal.example/",
+                 plug: {Req.Test, __MODULE__},
+                 trusted_hosts: ["internal.example"]
+               )
+    end
+
+    test "rejects HTTP and cross-host redirects in trusted-host mode" do
+      stub_dns(%{"internal.example" => {[{127, 0, 0, 1}], []}})
+
+      Req.Test.stub(__MODULE__, fn conn ->
+        case conn.request_path do
+          "/cross-host" ->
+            conn
+            |> Plug.Conn.put_resp_header("location", "https://other.example/favicon.png")
+            |> Plug.Conn.send_resp(302, "")
+
+          "/http" ->
+            conn
+            |> Plug.Conn.put_resp_header("location", "http://internal.example/favicon.png")
+            |> Plug.Conn.send_resp(302, "")
+        end
+      end)
+
+      opts = [plug: {Req.Test, __MODULE__}, trusted_hosts: ["internal.example"]]
+
+      assert SSRF.get("https://internal.example/cross-host", opts) ==
+               {:error, :restricted_address}
+
+      assert SSRF.get("https://internal.example/http", opts) == {:error, :invalid_url}
     end
 
     test "follows a redirect to a still-public host, re-validating before following" do
