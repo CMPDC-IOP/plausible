@@ -112,6 +112,17 @@ defmodule PlausibleWeb.Live.SitesTest do
       assert site_card =~ site.domain
     end
 
+    test "loads the site's favicon through the backend endpoint", %{conn: conn, user: user} do
+      _site = new_site(domain: "example.com/docs", owner: user)
+
+      {:ok, _lv, html} = live(conn, "/sites")
+
+      assert html =~ ~s|src="/favicon/sources/example.com%2Fdocs"|
+      refute html =~ "https://example.com/docs/favicon.ico"
+      refute html =~ ~s|phx-hook="SiteFavicon"|
+      refute html =~ "data-sources="
+    end
+
     test "filters by domain", %{conn: conn, user: user} do
       _site1 = new_site(domain: "first.example.com", owner: user)
       _site2 = new_site(domain: "second.example.com", owner: user)
