@@ -101,6 +101,12 @@ super_admin_user_ids =
   end)
   |> Enum.filter(& &1)
 
+favicon_trusted_hosts =
+  config_dir
+  |> get_var_from_path_or_env("FAVICON_TRUSTED_HOSTS", "")
+  |> String.split(",", trim: true)
+  |> Enum.map(&(&1 |> String.trim() |> String.downcase()))
+
 env = get_var_from_path_or_env(config_dir, "ENVIRONMENT", "prod")
 mailer_adapter = get_var_from_path_or_env(config_dir, "MAILER_ADAPTER", "Bamboo.Mua")
 mailer_email = get_var_from_path_or_env(config_dir, "MAILER_EMAIL", "plausible@#{base_url.host}")
@@ -386,6 +392,8 @@ config :plausible,
   session_transfer_dir: session_transfer_dir,
   sso_saml_adapter: sso_saml_adapter,
   sso_verification_nameservers: sso_verification_nameservers
+
+config :plausible, PlausibleWeb.Favicon, trusted_hosts: favicon_trusted_hosts
 
 config :plausible, :selfhost,
   enable_email_verification: enable_email_verification,

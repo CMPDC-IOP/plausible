@@ -198,7 +198,10 @@ export const SiteSwitcher = () => {
             >
               <div className="flex">
                 {canSeeViewAllSites && (
-                  <a className={buttonLinkClassName} href={withBasePath('/sites')}>
+                  <a
+                    className={buttonLinkClassName}
+                    href={withBasePath('/sites')}
+                  >
                     <ArrowLeftIcon className="size-4 mr-1.5" />
                     Back to sites
                   </a>
