@@ -38,7 +38,7 @@ defmodule Plausible.Auth.SSO.SAMLConfig do
 
   @spec entity_id(SSO.Integration.t()) :: String.t()
   def entity_id(integration) do
-    PlausibleWeb.Endpoint.url() <> "/sso/" <> integration.identifier
+    PlausibleWeb.URL.url("sso/#{integration.identifier}")
   end
 
   @spec changeset(t(), map()) :: Ecto.Changeset.t()

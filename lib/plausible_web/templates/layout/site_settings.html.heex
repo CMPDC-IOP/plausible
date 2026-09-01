@@ -2,7 +2,7 @@
 <div class="container pt-6">
   <.styled_link
     class="text-indigo-600 font-medium text-sm"
-    href={"/#{URI.encode_www_form(@site.domain)}"}
+    href={Routes.stats_path(@conn, :stats, @site.domain, [])}
   >
     ← Back to stats
   </.styled_link>
@@ -17,13 +17,13 @@
         conn={@conn}
         options={options}
         name="tab"
-        href_base={"/#{URI.encode_www_form(@site.domain)}/settings/"}
+        href_base={PlausibleWeb.URL.path("#{URI.encode_www_form(@site.domain)}/settings/")}
         selected_fn={&current_tab?(@conn, &1)}
       />
 
       <div class="hidden lg:block py-4 sticky top-0" data-testid="site_settings_sidebar">
         <Layout.settings_sidebar
-          prefix={"/#{URI.encode_www_form(@site.domain)}"}
+          prefix={PlausibleWeb.URL.path(URI.encode_www_form(@site.domain))}
           selected_fn={&current_tab?(@conn, &1)}
           options={options}
         />

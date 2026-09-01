@@ -12,7 +12,7 @@ defmodule PlausibleWeb.Plugins.API.Spec do
       servers: [
         %Server{
           description: "This server",
-          url: PlausibleWeb.Endpoint.url(),
+          url: PlausibleWeb.URL.base_url(),
           variables: %{}
         }
       ],

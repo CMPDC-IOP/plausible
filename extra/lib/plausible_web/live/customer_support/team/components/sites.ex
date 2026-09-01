@@ -122,8 +122,11 @@ defmodule PlausibleWeb.CustomerSupport.Team.Components.Sites do
           <.td>
             <div class="flex items-center">
               <img
-                src="/favicon/sources/{site.domain}"
-                onerror="this.onerror=null; this.src='/favicon/placeholders/source';"
+                src={PlausibleWeb.URL.path("favicon/sources/#{site.domain}")}
+                onerror={
+                  "this.onerror=null; this.src='" <>
+                    PlausibleWeb.URL.path("favicon/placeholders/source") <> "';"
+                }
                 class="size-4 flex-shrink-0 mt-px mr-2"
               />
               <.styled_link
