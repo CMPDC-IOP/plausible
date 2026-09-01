@@ -473,9 +473,7 @@ defmodule Plausible.Sites do
   end
 
   def shared_link_url(site, link) do
-    base = PlausibleWeb.Endpoint.url()
-    domain = "/share/#{URI.encode_www_form(site.domain)}"
-    base <> domain <> "?auth=" <> link.slug
+    PlausibleWeb.URL.url("share/#{URI.encode_www_form(site.domain)}?auth=#{link.slug}")
   end
 
   def update_legacy_time_on_page_cutoff!(site, cutoff) do

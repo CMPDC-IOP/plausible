@@ -170,7 +170,7 @@ defmodule Plausible.InstallationSupport.Verification.Diagnostics do
         _url
       )
       when response_status not in [200, 202] and is_binary(request_url) do
-    proxying? = not String.starts_with?(request_url, PlausibleWeb.Endpoint.url())
+    proxying? = not String.starts_with?(request_url, PlausibleWeb.URL.base_url())
 
     if proxying? do
       named_result!(:proxy_network_error)

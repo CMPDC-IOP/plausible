@@ -196,7 +196,7 @@ defmodule PlausibleWeb.Live.Sites do
         </p>
         <div class="flex flex-col sm:flex-row gap-3 mt-6">
           <.button_link
-            href={"/sites/new?flow=#{PlausibleWeb.Flows.provisioning()}"}
+            href={Routes.site_path(@socket, :new, flow: PlausibleWeb.Flows.provisioning())}
             theme="primary"
           >
             <Heroicons.plus class="size-4" /> Add website
@@ -798,8 +798,14 @@ defmodule PlausibleWeb.Live.Sites do
   def favicon(assigns) do
     assigns =
       assign(assigns,
-        light_src: "/favicon/sources/#{assigns.domain}?placeholder=site&ui-mode=light",
-        dark_src: "/favicon/sources/#{assigns.domain}?placeholder=site&ui-mode=dark"
+        light_src:
+          PlausibleWeb.URL.path(
+            "favicon/sources/#{assigns.domain}?placeholder=site&ui-mode=light"
+          ),
+        dark_src:
+          PlausibleWeb.URL.path(
+            "favicon/sources/#{assigns.domain}?placeholder=site&ui-mode=dark"
+          )
       )
 
     ~H"""

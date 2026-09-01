@@ -5,7 +5,7 @@ defmodule PlausibleWeb.StatsView do
   require Plausible.Billing
 
   def plausible_url do
-    PlausibleWeb.Endpoint.url()
+    PlausibleWeb.URL.base_url()
   end
 
   def large_number_format(n, opts \\ []) do

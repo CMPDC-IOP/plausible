@@ -15,7 +15,7 @@
             }>
               <.styled_link
                 class="text-sm font-medium"
-                href={"/cs/sites/site/#{@site.id}"}
+                href={PlausibleWeb.URL.path("cs/sites/site/#{@site.id}")}
                 new_tab={true}
               >
                 CS
@@ -126,7 +126,7 @@
                   >
                     Github repo
                   </.dropdown_item>
-                  <.dropdown_item href="/logout">Log out</.dropdown_item>
+                  <.dropdown_item href={~p"/logout"}>Log out</.dropdown_item>
                 </:menu>
               </.dropdown>
             </li>
@@ -137,10 +137,10 @@
             class="flex items-center gap-2"
             x-show="!document.cookie.includes('logged_in=true')"
           >
-            <.button_link href="/login" theme="ghost">Login</.button_link>
+            <.button_link href={~p"/login"} theme="ghost">Login</.button_link>
             <.button_link
               :if={Plausible.Auth.check_registration_enabled() == :ok}
-              href="/register"
+              href={~p"/register"}
             >
               Sign up
             </.button_link>

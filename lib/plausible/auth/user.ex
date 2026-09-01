@@ -206,7 +206,7 @@ defmodule Plausible.Auth.User do
       |> :erlang.md5()
       |> Base.encode16(case: :lower)
 
-    Path.join(PlausibleWeb.Endpoint.url(), ["avatar/", hash])
+    PlausibleWeb.URL.url("avatar/#{hash}")
   end
 
   def profile_img_url(email) when is_binary(email) do

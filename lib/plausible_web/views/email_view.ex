@@ -3,7 +3,7 @@ defmodule PlausibleWeb.EmailView do
   use PlausibleWeb, :view
 
   def plausible_url do
-    PlausibleWeb.Endpoint.url()
+    PlausibleWeb.URL.base_url()
   end
 
   def choose_plan_url(team) do

@@ -5,6 +5,7 @@ import { useSiteContext } from './site-context'
 import { useDashboardStateContext } from './dashboard-state-context'
 import { CACHE_TTL_REALTIME } from './hooks/api-client'
 import { isRealTimeDashboard } from './util/filters'
+import { apiPath } from './util/url'
 
 const CurrentVisitorsContext = createContext<number | null>(null)
 
@@ -22,8 +23,7 @@ export function CurrentVisitorsProvider({
 
   const { data } = useQuery<number>({
     queryKey: ['current-visitors'],
-    queryFn: () =>
-      get(`/api/stats/${encodeURIComponent(site.domain)}/current-visitors`),
+    queryFn: () => get(apiPath(site, '/current-visitors')),
     staleTime: CACHE_TTL_REALTIME,
     enabled: isEnabled
   })

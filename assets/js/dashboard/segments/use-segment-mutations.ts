@@ -13,6 +13,7 @@ import {
   SegmentData,
   SegmentDataFromApi
 } from '../filtering/segments'
+import { internalApiPath } from '../util/url'
 
 const toApiSegmentData = (segment_data: SegmentData) => ({
   filters: remapToApiFilters(segment_data.filters),
@@ -37,7 +38,7 @@ export function useCreateSegment() {
       segment_data: SegmentData
     }) => {
       const response: SavedSegment & { segment_data: SegmentDataFromApi } =
-        await mutation(`/api/${encodeURIComponent(site.domain)}/segments`, {
+        await mutation(internalApiPath(site, '/segments'), {
           method: 'POST',
           body: {
             name,
@@ -83,7 +84,7 @@ export function usePatchSegment() {
       }) => {
       const response: SavedSegment & { segment_data: SegmentDataFromApi } =
         await mutation(
-          `/api/${encodeURIComponent(site.domain)}/segments/${id}`,
+          internalApiPath(site, `/segments/${id}`),
           {
             method: 'PATCH',
             body: {
@@ -126,7 +127,7 @@ export function useDeleteSegment() {
     mutationFn: async ({ id }: Pick<SavedSegment, 'id'>) => {
       const response: SavedSegment & { segment_data: SegmentDataFromApi } =
         await mutation(
-          `/api/${encodeURIComponent(site.domain)}/segments/${id}`,
+          internalApiPath(site, `/segments/${id}`),
           {
             method: 'DELETE'
           }
