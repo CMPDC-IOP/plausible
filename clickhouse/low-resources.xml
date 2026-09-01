@@ -1,0 +1,8 @@
+<clickhouse>
+    <!-- https://clickhouse.com/docs/en/operations/server-configuration-parameters/settings#mark_cache_size -->
+    <mark_cache_size>524288000</mark_cache_size>
+
+    <!-- Keep background/global thread pools modest for this shared host. -->
+    <background_schedule_pool_size>64</background_schedule_pool_size>
+    <max_thread_pool_size>1024</max_thread_pool_size>
+</clickhouse>
