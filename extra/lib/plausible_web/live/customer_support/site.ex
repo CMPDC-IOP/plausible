@@ -15,7 +15,7 @@ defmodule PlausibleWeb.Live.CustomerSupport.Site do
 
   def favicon(assigns) do
     ~H"""
-    <img src={"/favicon/sources/#{@domain}"} class={@class} />
+    <img src={PlausibleWeb.URL.path("favicon/sources/#{@domain}")} class={@class} />
     """
   end
 

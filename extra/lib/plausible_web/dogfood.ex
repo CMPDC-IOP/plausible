@@ -47,7 +47,7 @@ defmodule PlausibleWeb.Dogfood do
           ""
       end
 
-    "#{PlausibleWeb.Endpoint.url()}/js/#{tracker_script_config_id}.js"
+    PlausibleWeb.URL.url("js/#{tracker_script_config_id}.js")
   end
 
   # TRICKY: The React dashboard uses history-based SPA navigation
@@ -63,7 +63,7 @@ defmodule PlausibleWeb.Dogfood do
   end
 
   defp location_override(%{dogfood_page_path: path}) when is_binary(path) do
-    Path.join(PlausibleWeb.Endpoint.url(), path)
+    PlausibleWeb.URL.url(path)
   end
 
   defp location_override(_), do: nil

@@ -3,6 +3,7 @@ import { numberShortFormatter } from '../../util/number-formatter'
 import RocketIcon from '../modals/rocket-icon'
 import LazyLoader from '../../components/lazy-loader'
 import { PlausibleSite, useSiteContext } from '../../site-context'
+import { sitePath } from '../../util/url'
 import {
   SearchTermsErrorCode,
   SearchTermsErrorPayload,
@@ -57,7 +58,7 @@ function ConfigureSearchTermsCTA({
     <>
       <div>Configure the integration to view search terms</div>
       <a
-        href={`/${encodeURIComponent(site.domain)}/settings/integrations`}
+        href={sitePath(site, '/settings/integrations')}
         className="button mt-4"
       >
         Connect with Google
