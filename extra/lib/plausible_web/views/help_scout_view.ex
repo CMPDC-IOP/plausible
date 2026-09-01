@@ -5,7 +5,7 @@ defmodule PlausibleWeb.HelpScoutView do
     ~H"""
     <.layout xhr?={assigns[:xhr?]}>
       <div class="search">
-        <form action="/helpscout/search">
+        <form action={PlausibleWeb.URL.path("helpscout/search")}>
           <p class="entry w-full">
             <input
               type="text"
@@ -144,7 +144,7 @@ defmodule PlausibleWeb.HelpScoutView do
         </p>
       <% else %>
         <div class="search">
-          <form action="/helpscout/search">
+          <form action={PlausibleWeb.URL.path("helpscout/search")}>
             <p class="entry">
               <input
                 type="text"

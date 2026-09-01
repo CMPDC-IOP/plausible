@@ -15,6 +15,7 @@ import { ErrorPanel } from '../components/error-panel'
 import { Role, UserContextValue } from '../user-context'
 import { useSiteContext } from '../site-context'
 import { Button } from '../components/button'
+import { internalApiPath, sitePath } from '../util/url'
 import {
   Checkbox,
   getOptionDisabledMessage,
@@ -151,7 +152,7 @@ export const DeleteSegmentModal = ({
     queryKey: [segment.id],
     queryFn: async () => {
       const response: string[] = await get(
-        `/api/${encodeURIComponent(site.domain)}/segments/${segment.id}/shared-links`
+        internalApiPath(site, `/segments/${segment.id}/shared-links`)
       )
       return response
     }
@@ -191,7 +192,7 @@ export const DeleteSegmentModal = ({
             {links.map((name, index) => (
               <a
                 key={index}
-                href={`/${encodeURIComponent(site.domain)}/settings/visibility`}
+                href={sitePath(site, '/settings/visibility')}
                 className="break-words text-indigo-600 hover:text-indigo-700 dark:text-indigo-500 dark:hover:text-indigo-400"
               >
                 {name}

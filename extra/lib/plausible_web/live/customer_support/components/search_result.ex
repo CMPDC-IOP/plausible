@@ -8,7 +8,7 @@ defmodule PlausibleWeb.CustomerSupport.Components.SearchResult do
 
   def favicon(assigns) do
     ~H"""
-    <img src={"/favicon/sources/#{@domain}"} class={@class} />
+    <img src={PlausibleWeb.URL.path("favicon/sources/#{@domain}")} class={@class} />
     """
   end
 
