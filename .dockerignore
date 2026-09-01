@@ -32,6 +32,7 @@
 .elixir_ls
 plausible-report.xml
 .env
+.env.production
 .idea
 *.iml
 *.log

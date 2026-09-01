@@ -6,7 +6,7 @@
 FROM node:24.17.0-alpine3.23@sha256:7c70d1235c0b4c2bc9eeed5393d19f1bbdde6885ba0d58ba62bb385d7b0f3ff1 AS nodejs
 
 #### Builder
-FROM hexpm/elixir:1.20.4-erlang-28.5.0.5-alpine-3.23.5@sha256:743f3bddec5e9d65b7f65902b1f4ce2a625e58cea6e8e93238757b042bec78db AS buildcontainer
+FROM dockerproxy.net/hexpm/elixir:1.20.4-erlang-28.5.0.5-alpine-3.23.5@sha256:743f3bddec5e9d65b7f65902b1f4ce2a625e58cea6e8e93238757b042bec78db AS buildcontainer
 
 ARG MIX_ENV=ce
 
@@ -37,8 +37,12 @@ COPY mix.lock ./
 COPY config ./config
 RUN mix local.hex --force && \
   mix local.rebar --force && \
-  mix deps.get --only ${MIX_ENV} && \
+  for attempt in 1 2 3; do mix deps.get --only ${MIX_ENV} && break; test "$attempt" -lt 3 || exit 1; sleep 2; done && \
   mix deps.compile
+
+ADD --chmod=755 --checksum=sha256:a8a1926a2951a5da0684c568d612bc0a590600334d3a85d0e63ea90ac7ced2e5 \
+  https://github.com/tailwindlabs/tailwindcss/releases/download/v4.1.12/tailwindcss-linux-x64-musl \
+  /app/_build/tailwind-linux-x64-musl
 
 COPY assets/package.json assets/package-lock.json ./assets/
 COPY tracker/package.json tracker/package-lock.json ./tracker/
@@ -53,7 +57,7 @@ COPY lib ./lib
 COPY extra ./extra
 
 RUN npm run deploy --prefix ./tracker && \
-  mix assets.deploy && \
+  for attempt in 1 2 3; do mix assets.deploy && break; test "$attempt" -lt 3 || exit 1; sleep 2; done && \
   mix phx.digest priv/static && \
   mix download_country_database && \
   mix sentry.package_source_code
@@ -93,4 +97,3 @@ EXPOSE 8000
 ENV DEFAULT_DATA_DIR=/var/lib/plausible
 VOLUME /var/lib/plausible
 CMD ["run"]
-
