@@ -85,6 +85,7 @@ plausible-report.xml
 /priv/plts/*.plt.hash
 
 .env
+.env.production
 
 # Geolocation databases
 /priv/geodb/*.mmdb
@@ -99,3 +100,6 @@ plausible-report.xml
 plausible_db*
 
 .claude
+
+# Build tools downloaded on the host; never committed.
+/build-assets/
