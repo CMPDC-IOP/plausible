@@ -1,38 +1,26 @@
 defmodule PlausibleWeb.AvatarController do
   @moduledoc """
-  This module proxies requests to BASE_URL/avatar/:hash to www.gravatar.com/avatar/:hash.
-
-  The purpose is to make use of Gravatar's convenient avatar service without exposing information
-  that could be used for tracking the Plausible user. Compared to requesting the Gravatar directly
-  from the browser, this proxy module protects the Plausible user from disclosing to Gravatar:
-  1. The client IP address
-  2. User-Agent
-  3. Referer header which can be used to track which site the user is visiting (i.e. plausible.io or self-hosted URL)
-
-  The downside is the added latency from the request having to go through the Plausible server, rather than contacting the
-  local CDN server operated by Gravatar's service.
+  Generates deterministic local avatars without disclosing user information to third parties.
   """
   use PlausibleWeb, :controller
-  alias Plausible.HTTPClient
 
-  @gravatar_base_url "https://www.gravatar.com"
-  def avatar(conn, params) do
-    url = Path.join(@gravatar_base_url, ["avatar/", params["hash"]]) <> "?s=150&d=identicon"
+  def avatar(conn, %{"hash" => hash}) do
+    <<red, green, blue, _rest::binary>> = :crypto.hash(:sha256, hash)
+    color = Base.encode16(<<red, green, blue>>, case: :lower)
 
-    case HTTPClient.impl().get(url) do
-      {:ok, %Finch.Response{status: 200, body: body, headers: headers}} ->
-        conn
-        |> forward_headers(headers)
-        |> send_resp(200, body)
+    body = """
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150">
+      <rect width="150" height="150" rx="75" fill="##{color}"/>
+      <circle cx="75" cy="56" r="28" fill="#fff" opacity=".9"/>
+      <path d="M25 137c4-29 24-45 50-45s46 16 50 45" fill="#fff" opacity=".9"/>
+    </svg>
+    """
 
-      {:error, _} ->
-        send_resp(conn, 400, "")
-    end
-  end
-
-  @forwarded_headers ["content-type", "cache-control", "expires"]
-  defp forward_headers(%Plug.Conn{} = conn, headers) do
-    headers_to_forward = Enum.filter(headers, fn {k, _} -> k in @forwarded_headers end)
-    %Plug.Conn{conn | resp_headers: headers_to_forward}
+    conn
+    |> put_resp_content_type("image/svg+xml")
+    |> put_resp_header("cache-control", "public, max-age=2592000")
+    |> put_resp_header("content-security-policy", "default-src 'none'")
+    |> put_resp_header("x-content-type-options", "nosniff")
+    |> send_resp(200, body)
   end
 end
