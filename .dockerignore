@@ -32,6 +32,7 @@
 .elixir_ls
 plausible-report.xml
 .env
+.env.production
 .idea
 *.iml
 *.log
@@ -68,6 +69,7 @@ npm-debug.log
 # Geolocation databases
 /priv/geodb/*.mmdb
 /priv/geodb/*.mmdb.gz
+!/priv/geodb/dbip-country.mmdb.gz
 
 # Docker volumes
 .clickhouse_db_vol*
