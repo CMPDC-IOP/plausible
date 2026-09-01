@@ -22,6 +22,8 @@ import { rootRoute } from './router'
 import { get } from './api'
 import { ErrorPanel } from './components/error-panel'
 import { useRoutelessModalsContext } from './navigation/routeless-modals-context'
+import { siteBasePath, sitePath } from './util/url'
+import { withBasePath } from '../base-path'
 
 const menuItemClassName = classNames(
   popover.items.classNames.navigationLink,
@@ -48,7 +50,7 @@ const getSwitchToSiteURL = (
   if (currentSite.domain === site.domain) {
     return null
   }
-  const url = `/${encodeURIComponent(site.domain)}`
+  const url = siteBasePath({ domain: site.domain, shared: false })
 
   return site.needsVerification
     ? `${url}?verify_installation=true&flow=provisioning`
@@ -87,7 +89,7 @@ export const SiteSwitcher = () => {
     queryFn: async (): Promise<{
       data: Array<{ domain: string; needs_verification: boolean }>
     }> => {
-      const response = await get('/api/sites')
+      const response = await get(withBasePath('/api/sites'))
       return response
     },
     placeholderData: (previousData) => previousData
@@ -204,7 +206,7 @@ export const SiteSwitcher = () => {
             >
               <div className="flex">
                 {canSeeViewAllSites && (
-                  <a className={buttonLinkClassName} href={`/sites`}>
+                  <a className={buttonLinkClassName} href={withBasePath('/sites')}>
                     <ArrowLeftIcon className="size-4 mr-1.5" />
                     Back to sites
                   </a>
@@ -212,7 +214,7 @@ export const SiteSwitcher = () => {
                 {canSeeSiteSettings && (
                   <a
                     className={buttonLinkClassName}
-                    href={`/${encodeURIComponent(currentSite.domain)}/settings/general`}
+                    href={sitePath(currentSite, '/settings/general')}
                   >
                     <Cog8ToothIcon className="size-4 mr-1.5" />
                     Site settings

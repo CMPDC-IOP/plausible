@@ -4,6 +4,7 @@ import { useInRouterContext } from 'react-router-dom'
 import { PlausibleSite } from '../site-context'
 import { getRouterBasepath, rootRoute } from '../router'
 import { AppNavigationLink } from '../navigation/use-app-navigate'
+import { withBasePath } from '../../base-path'
 
 export function SomethingWentWrongMessage({
   error,
@@ -60,7 +61,7 @@ export function GoToSites() {
   return (
     <>
       <>Try going back or </>
-      <a href={'/sites'} className={linkClass}>
+      <a href={withBasePath('/sites')} className={linkClass}>
         {'go to your sites'}
       </a>
     </>

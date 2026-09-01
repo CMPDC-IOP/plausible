@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react'
 import classNames from 'classnames'
 import { DiamondIcon } from './icons'
+import { withBasePath } from '../../base-path'
 
 export type PillColor = 'green' | 'yellow' | 'indigo'
 
@@ -51,7 +52,7 @@ export function UpgradePill({
     return pill
   }
   return (
-    <a href="/billing/choose-plan" className="inline-block">
+    <a href={withBasePath('/billing/choose-plan')} className="inline-block">
       {pill}
     </a>
   )

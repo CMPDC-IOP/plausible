@@ -12,6 +12,7 @@
       <meta name="csrf-token" content={Plug.CSRFProtection.get_csrf_token()} />
       <meta name="websocket-url" content={websocket_url()} />
     <% end %>
+    <meta name="plausible-base-path" content={base_path()} />
     <meta name="robots" content={@conn.private.robots} />
     <meta
       name="x-api-version"

@@ -1,6 +1,7 @@
 import React from 'react'
 import classNames from 'classnames'
 import { useTheme } from '../../theme-context'
+import { withBasePath } from '../../../base-path'
 
 interface SourceFaviconProps {
   name: string
@@ -16,7 +17,9 @@ export const SourceFavicon = ({ name, className }: SourceFaviconProps) => {
   return (
     <img
       alt=""
-      src={`/favicon/sources/${encodeURIComponent(name)}?ui-mode=${mode}`}
+      src={withBasePath(
+        `/favicon/sources/${encodeURIComponent(name)}?ui-mode=${mode}`
+      )}
       referrerPolicy="no-referrer"
       className={classNames(
         className,

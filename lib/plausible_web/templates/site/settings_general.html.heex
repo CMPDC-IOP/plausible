@@ -19,7 +19,7 @@
         <.settings_divider />
       <% end %>
 
-      <.form :let={f} for={@changeset} action={"/#{URI.encode_www_form(@site.domain)}/settings"}>
+      <.form :let={f} for={@changeset} action={Routes.site_path(@conn, :update_settings, @site.domain)}>
         <.settings_row
           label="Reporting timezone"
           for={f[:timezone].id}

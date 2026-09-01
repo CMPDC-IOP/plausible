@@ -185,6 +185,6 @@ defmodule PlausibleWeb.Live.Installation.Instructions do
   end
 
   defp tracker_url(tracker_script_configuration) do
-    "#{PlausibleWeb.Endpoint.url()}/js/#{tracker_script_configuration.id}.js"
+    PlausibleWeb.URL.url("js/#{tracker_script_configuration.id}.js")
   end
 end

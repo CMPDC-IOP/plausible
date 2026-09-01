@@ -4,6 +4,7 @@
 import React from 'react'
 import classNames from 'classnames'
 import { useTheme } from '../theme-context'
+import { withBasePath } from '../../base-path'
 
 const siteIconClassName = 'shrink-0 size-5.5 rounded-md'
 
@@ -20,11 +21,13 @@ export const Favicon = ({ domain }: { domain: string }) => {
     <img
       aria-hidden="true"
       alt=""
-      src={`/favicon/sources/${encodeURIComponent(domain)}?placeholder=site&ui-mode=${mode}`}
+      src={withBasePath(
+        `/favicon/sources/${encodeURIComponent(domain)}?placeholder=site&ui-mode=${mode}`
+      )}
       onError={(e) => {
         const target = e.target as HTMLImageElement
         target.onerror = null
-        target.src = `/favicon/placeholders/site?ui-mode=${mode}`
+        target.src = withBasePath(`/favicon/placeholders/site?ui-mode=${mode}`)
       }}
       referrerPolicy="no-referrer"
       className={siteIconClassName}

@@ -181,7 +181,7 @@ defmodule PlausibleWeb.AuthController do
       case Auth.lookup(email) do
         {:ok, _user} ->
           token = Auth.Token.sign_password_reset(email)
-          url = PlausibleWeb.Endpoint.url() <> "/password/reset?token=#{token}"
+          url = PlausibleWeb.URL.url("password/reset?token=#{token}")
           email_template = PlausibleWeb.Email.password_reset_email(email, url)
           Plausible.Mailer.deliver_later(email_template)
 
