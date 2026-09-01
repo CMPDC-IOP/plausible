@@ -1,4 +1,12 @@
-import { apiPath, externalLinkForPage, isValidHttpUrl, trimURL } from './url'
+import {
+  apiPath,
+  externalLinkForPage,
+  internalApiPath,
+  isValidHttpUrl,
+  siteBasePath,
+  sitePath,
+  trimURL
+} from './url'
 import { siteContextDefaultValue } from '../site-context'
 
 describe('apiPath', () => {
@@ -18,6 +26,38 @@ describe('apiPath', () => {
       expect(result).toBe(expected)
     }
   )
+})
+
+describe('base path', () => {
+  beforeEach(() => {
+    document.head.innerHTML =
+      '<meta name="plausible-base-path" content="/plausible">'
+  })
+
+  afterEach(() => {
+    document.head.innerHTML = ''
+  })
+
+  it('prefixes domain-based dashboard and API paths', () => {
+    const site = { domain: 'example.com/path', shared: false }
+
+    expect(apiPath(site, '/query')).toBe(
+      '/plausible/api/stats/example.com%2Fpath/query/'
+    )
+    expect(internalApiPath(site, '/annotations')).toBe(
+      '/plausible/api/example.com%2Fpath/annotations'
+    )
+    expect(siteBasePath(site)).toBe('/plausible/example.com%2Fpath')
+    expect(sitePath(site, '/settings/general')).toBe(
+      '/plausible/example.com%2Fpath/settings/general'
+    )
+  })
+
+  it('prefixes shared dashboard paths', () => {
+    expect(siteBasePath({ domain: 'example.com', shared: true })).toBe(
+      '/plausible/share/example.com'
+    )
+  })
 })
 
 describe('externalLinkForPage', () => {

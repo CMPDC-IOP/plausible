@@ -52,7 +52,7 @@
               :let={f}
               for={Plausible.Site.GoogleAuth.changeset(@site.google_auth)}
               class="max-w-xs"
-              action={"/#{URI.encode_www_form(@site.domain)}/settings/google"}
+              action={Routes.site_path(@conn, :update_google_auth, @site.domain)}
             >
               <div class="mt-2 w-full">
                 {live_render(@conn, PlausibleWeb.Live.PlainCombo,

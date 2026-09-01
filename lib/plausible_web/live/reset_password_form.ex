@@ -61,7 +61,7 @@ defmodule PlausibleWeb.Live.ResetPasswordForm do
         </.button>
 
         <p class="text-sm text-center text-gray-500 dark:text-gray-400">
-          <.styled_link href="/login">Back to sign in</.styled_link>
+          <.styled_link href={Routes.auth_path(@socket, :login_form)}>Back to sign in</.styled_link>
         </p>
       </div>
     </.form>

@@ -1,4 +1,5 @@
 import React, { ReactElement } from 'react'
+import { withBasePath } from '../../../base-path'
 
 const ICON_CLASS = 'shrink-0 inline-block size-4 mr-2'
 
@@ -16,6 +17,9 @@ const SHARED_SVG_PROPS = {
   strokeLinejoin: 'round',
   className: `${ICON_CLASS} ${SVG_ICON_COLOR_CLASS}`
 } as const
+
+const iconPath = (type: 'browser' | 'os', filename: string) =>
+  withBasePath(`/images/icon/${type}/${filename}`)
 
 // Icons copied from https://github.com/alrra/browser-logos
 const BROWSER_ICONS: Record<string, string> = {
@@ -57,7 +61,7 @@ export const BrowserIcon = ({ dimensionValue }: { dimensionValue: string }) => {
   return (
     <img
       alt=""
-      src={`/images/icon/browser/${filename}`}
+      src={iconPath('browser', filename)}
       className={ICON_CLASS}
     />
   )
@@ -98,7 +102,7 @@ export const OsIcon = ({ dimensionValue }: { dimensionValue: string }) => {
   }
 
   return (
-    <img alt="" src={`/images/icon/os/${filename}`} className={ICON_CLASS} />
+    <img alt="" src={iconPath('os', filename)} className={ICON_CLASS} />
   )
 }
 

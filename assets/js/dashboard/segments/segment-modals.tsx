@@ -29,6 +29,7 @@ import { useSegmentsContext } from '../filtering/segments-context'
 import { Role, UserContextValue, useUserContext } from '../user-context'
 import { useSiteContext } from '../site-context'
 import { Button, buttonClassName } from '../components/button'
+import { internalApiPath } from '../util/url'
 import {
   Checkbox,
   getOptionDisabledMessage,
@@ -160,7 +161,7 @@ export const DeleteSegmentModal = ({
     queryKey: [segment.id],
     queryFn: async () => {
       const response: string[] = await get(
-        `/api/${encodeURIComponent(site.domain)}/segments/${segment.id}/shared-links`
+        internalApiPath(site, `/segments/${segment.id}/shared-links`)
       )
       return response
     }
