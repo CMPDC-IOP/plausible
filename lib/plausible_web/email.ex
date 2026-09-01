@@ -478,8 +478,9 @@ defmodule PlausibleWeb.Email do
       site_import: site_import,
       label: label,
       link:
-        PlausibleWeb.Endpoint.url() <>
-          "/" <> URI.encode_www_form(site_import.site.domain) <> "?__team=#{team.identifier}",
+        PlausibleWeb.URL.url(
+          "#{URI.encode_www_form(site_import.site.domain)}?__team=#{team.identifier}"
+        ),
       user: user,
       success: true
     })

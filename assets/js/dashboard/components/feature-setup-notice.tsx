@@ -3,6 +3,7 @@ import classNames from 'classnames'
 import { MODES } from '../stats/behaviours/modes-context'
 import * as api from '../api'
 import { useSiteContext } from '../site-context'
+import { internalApiPath } from '../util/url'
 import { UpgradePill } from './pill'
 import { buttonClassName } from './button'
 
@@ -33,7 +34,7 @@ export function FeatureSetupNotice({
       )
     ) {
       api
-        .mutation(`/api/${encodeURIComponent(site.domain)}/disable-feature`, {
+        .mutation(internalApiPath(site, '/disable-feature'), {
           method: 'PUT',
           body: { feature: feature }
         })

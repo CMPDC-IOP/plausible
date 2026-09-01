@@ -28,7 +28,7 @@
       <% true -> %>
         <.button_link
           data-confirm="Deleting your account will also delete all the sites and data that you own. This action cannot be reversed. Are you sure?"
-          href="/me"
+          href={Routes.auth_path(@conn, :delete_me)}
           method="delete"
           theme="danger"
           mt?={false}

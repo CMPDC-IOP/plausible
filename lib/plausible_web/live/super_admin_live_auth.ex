@@ -18,7 +18,7 @@ defmodule PlausibleWeb.Live.SuperAdminLiveAuth do
     if Plausible.Auth.super_admin?(current_user) do
       {:cont, socket}
     else
-      {:halt, redirect(socket, to: "/")}
+      {:halt, redirect(socket, to: PlausibleWeb.URL.path(""))}
     end
   end
 end

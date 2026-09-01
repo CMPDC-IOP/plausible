@@ -1,6 +1,7 @@
 import React from 'react'
 import { createBrowserRouter, Outlet, useRouteError } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { siteBasePath } from './util/url'
 
 import { PlausibleSite, useSiteContext } from './site-context'
 import {
@@ -209,10 +210,7 @@ export const filterRoute = {
 export function getRouterBasepath(
   site: Pick<PlausibleSite, 'shared' | 'domain'>
 ): string {
-  const basepath = site.shared
-    ? `/share/${encodeURIComponent(site.domain)}`
-    : `/${encodeURIComponent(site.domain)}`
-  return basepath
+  return siteBasePath(site)
 }
 
 function RouteErrorElement() {

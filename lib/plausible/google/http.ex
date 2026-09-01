@@ -106,5 +106,5 @@ defmodule Plausible.Google.HTTP do
   defp client_id, do: Keyword.fetch!(config(), :client_id)
   defp client_secret, do: Keyword.fetch!(config(), :client_secret)
   defp api_url, do: Keyword.fetch!(config(), :api_url)
-  defp redirect_uri, do: PlausibleWeb.Endpoint.url() <> "/auth/google/callback"
+  defp redirect_uri, do: PlausibleWeb.URL.url("auth/google/callback")
 end

@@ -12,6 +12,7 @@ import topbar from 'topbar'
 /* eslint-enable import/no-unresolved */
 
 import Alpine from 'alpinejs'
+import { withBasePath } from '../base-path'
 
 import CopySnippet from './copy-snippet'
 import MemberRows from './member-rows'
@@ -60,7 +61,10 @@ if (csrfToken && websocketUrl) {
   }
   let token = csrfToken.getAttribute('content')
   let url = websocketUrl.getAttribute('content')
-  let liveUrl = url === '' ? '/live' : new URL('/live', url).href
+  let liveUrl =
+    url === ''
+      ? withBasePath('/live')
+      : new URL(withBasePath('/live'), url).href
   let liveSocket = new LiveSocket(liveUrl, Socket, {
     heartbeatIntervalMs: 10000,
     params: { _csrf_token: token },

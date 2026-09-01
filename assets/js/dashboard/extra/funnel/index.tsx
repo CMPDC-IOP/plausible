@@ -18,6 +18,7 @@ import {
   numberShortFormatter,
   rateFormatter
 } from '../../util/number-formatter'
+import { apiPath } from '../../util/url'
 import { Tooltip } from '../../util/tooltip'
 import { useDashboardStateContext } from '../../dashboard-state-context'
 import { useSiteContext } from '../../site-context'
@@ -477,7 +478,7 @@ export default function Funnel({
       }
 
       return api.get(
-        `/api/stats/${encodeURIComponent(site.domain)}/funnels/${funnelMeta.id}`,
+        apiPath(site, `/funnels/${funnelMeta.id}`),
         queryKey[1].dashboardState
       )
     },

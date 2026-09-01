@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useSiteContext } from './site-context'
 import * as api from './api'
+import { internalApiPath, sitePath } from './util/url'
 
 // CTA for configuring weekly email reports. It displays when the
 // dashboard is loaded for the very first time, having actual data
@@ -28,7 +29,7 @@ export function EmailReportsCTABanner() {
     setVisible(false)
 
     api
-      .mutation(`/api/${encodeURIComponent(site.domain)}/complete-onboarding`, {
+      .mutation(internalApiPath(site, '/complete-onboarding'), {
         method: 'PUT',
         body: {}
       })
@@ -58,7 +59,7 @@ export function EmailReportsCTABanner() {
       </span>{' '}
       <a
         className="plausible-event-name=Weekly+Email+Note+Click text-indigo-600 hover:text-indigo-700 dark:text-indigo-500 dark:hover:text-indigo-400 transition-colors duration-150"
-        href={`/${encodeURIComponent(site.domain)}/settings/email-reports?cta_clicked=true`}
+        href={`${sitePath(site, '/settings/email-reports')}?cta_clicked=true`}
         onClick={() => setVisible(false)}
       >
         Get weekly traffic reports by email →

@@ -98,14 +98,14 @@ defmodule PlausibleWeb.Live.ImportsExportsSettings do
             >
               Import from
               <img
-                src="/images/icon/google_analytics_logo.svg"
+                src={PlausibleWeb.URL.path("images/icon/google_analytics_logo.svg")}
                 alt="Google Analytics import"
                 class="h-6 w-12 -my-1"
               />
             </.button_link>
             <.button_link
               disabled={@import_in_progress? or @at_maximum?}
-              href={"/#{URI.encode_www_form(@site.domain)}/settings/import"}
+              href={Routes.site_path(@socket, :csv_import, @site.domain)}
               mt?={false}
             >
               Import from CSV
@@ -122,14 +122,14 @@ defmodule PlausibleWeb.Live.ImportsExportsSettings do
           >
             Import from
             <img
-              src="/images/icon/google_analytics_logo.svg"
+              src={PlausibleWeb.URL.path("images/icon/google_analytics_logo.svg")}
               alt="Google Analytics import"
               class="h-6 w-12 -my-1"
             />
           </.button_link>
           <.button_link
             disabled={@import_in_progress? or @at_maximum?}
-            href={"/#{URI.encode_www_form(@site.domain)}/settings/import"}
+            href={Routes.site_path(@socket, :csv_import, @site.domain)}
             mt?={false}
           >
             Import from CSV
@@ -192,7 +192,7 @@ defmodule PlausibleWeb.Live.ImportsExportsSettings do
               </.td>
               <.td actions>
                 <.delete_button
-                  href={"/#{URI.encode_www_form(@site.domain)}/settings/forget-import/#{entry.site_import.id}"}
+                  href={Routes.site_path(@socket, :forget_import, @site.domain, entry.site_import.id)}
                   method="delete"
                   data-confirm="Are you sure you want to delete this import?"
                 />
