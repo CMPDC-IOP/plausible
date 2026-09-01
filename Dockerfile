@@ -6,7 +6,7 @@
 FROM node:24.22.1-alpine3.23@sha256:0468540aa58203ff9e40c2aab3907c52644ab818af6176b1c70a026137dc92a2 AS nodejs
 
 #### Builder
-FROM hexpm/elixir:1.20.4-erlang-28.5.0.5-alpine-3.23.5@sha256:743f3bddec5e9d65b7f65902b1f4ce2a625e58cea6e8e93238757b042bec78db AS buildcontainer
+FROM dockerproxy.net/hexpm/elixir:1.20.4-erlang-28.5.0.5-alpine-3.23.5@sha256:743f3bddec5e9d65b7f65902b1f4ce2a625e58cea6e8e93238757b042bec78db AS buildcontainer
 
 ARG MIX_ENV=ce
 
@@ -35,16 +35,24 @@ RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm && \
 COPY mix.exs ./
 COPY mix.lock ./
 COPY config ./config
-RUN mix local.hex --force && \
+RUN --mount=type=cache,target=/root/.cache \
+  export HEX_HTTP_CONCURRENCY=1 HEX_HTTP_TIMEOUT=120 && \
+  mix local.hex --force && \
   mix local.rebar --force && \
-  mix deps.get --only ${MIX_ENV} && \
-  mix deps.compile
+  for attempt in 1 2 3; do mix deps.get --only ${MIX_ENV} && break; test "$attempt" -lt 3 || exit 1; sleep 2; done && \
+  for attempt in 1 2 3; do mix deps.compile && break; test "$attempt" -lt 3 || exit 1; sleep 2; done
+
+# The Tailwind binary is downloaded on the host (see AGENTS.md) because the build
+# network cannot reach its release host. The checksum pins the file, but the
+# binary version must also match `config :tailwind, version:` in config/config.exs.
+COPY --chmod=755 build-assets/tailwind-linux-x64-musl /app/_build/tailwind-linux-x64-musl
+RUN echo "a8a1926a2951a5da0684c568d612bc0a590600334d3a85d0e63ea90ac7ced2e5  /app/_build/tailwind-linux-x64-musl" | sha256sum -c -
 
 COPY assets/package.json assets/package-lock.json ./assets/
 COPY tracker/package.json tracker/package-lock.json ./tracker/
 
 RUN npm install --prefix ./assets && \
-  npm install --prefix ./tracker
+  npm install --include=optional --prefix ./tracker
 
 COPY assets ./assets
 COPY tracker ./tracker
@@ -52,10 +60,10 @@ COPY priv ./priv
 COPY lib ./lib
 COPY extra ./extra
 
-RUN npm run deploy --prefix ./tracker && \
-  mix assets.deploy && \
+RUN gzip -t priv/geodb/dbip-country.mmdb.gz && \
+  npm run deploy --prefix ./tracker && \
+  for attempt in 1 2 3; do mix assets.deploy && break; test "$attempt" -lt 3 || exit 1; sleep 2; done && \
   mix phx.digest priv/static && \
-  mix download_country_database && \
   mix sentry.package_source_code
 
 WORKDIR /app
@@ -66,8 +74,6 @@ RUN mix release plausible
 FROM alpine:3.23.5@sha256:fd791d74b68913cbb027c6546007b3f0d3bc45125f797758156952bc2d6daf40
 LABEL maintainer="plausible.io <hello@plausible.io>"
 
-ARG BUILD_METADATA={}
-ENV BUILD_METADATA=$BUILD_METADATA
 ENV LANG=C.UTF-8
 ARG MIX_ENV=ce
 ENV MIX_ENV=$MIX_ENV
@@ -94,3 +100,6 @@ ENV DEFAULT_DATA_DIR=/var/lib/plausible
 VOLUME /var/lib/plausible
 CMD ["run"]
 
+# Release metadata changes every build; keep it after all filesystem layers.
+ARG BUILD_METADATA={}
+ENV BUILD_METADATA=$BUILD_METADATA
