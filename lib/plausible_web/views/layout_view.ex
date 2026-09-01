@@ -9,7 +9,11 @@ defmodule PlausibleWeb.LayoutView do
   require Plausible.Billing
 
   def plausible_url do
-    PlausibleWeb.Endpoint.url()
+    PlausibleWeb.URL.base_url()
+  end
+
+  def base_path do
+    PlausibleWeb.URL.base_path()
   end
 
   def websocket_url() do
@@ -38,7 +42,7 @@ defmodule PlausibleWeb.LayoutView do
   end
 
   def home_dest(current_user) do
-    if current_user, do: "/sites", else: "/"
+    if current_user, do: PlausibleWeb.URL.path("sites"), else: PlausibleWeb.URL.path("")
   end
 
   def logo_path(filename) do

@@ -3,6 +3,8 @@ defmodule PlausibleWeb.Endpoint do
   use Sentry.PlugCapture
   use Phoenix.Endpoint, otp_app: :plausible
 
+  plug :put_configured_script_name
+
   on_ce do
     plug :maybe_handle_acme_challenge
     plug :maybe_force_ssl, Plug.SSL.init(_no_opts = [])
@@ -89,6 +91,40 @@ defmodule PlausibleWeb.Endpoint do
   plug(PlausibleWeb.Router)
 
   def secure_cookie?, do: config!(:secure_cookie)
+
+  @doc false
+  def put_configured_script_name(conn, _opts), do: put_script_name(conn, script_name())
+
+  @doc false
+  def put_script_name(conn, []), do: conn
+
+  def put_script_name(conn, configured_script_name) do
+    base_path = PlausibleWeb.URL.script_name_path(configured_script_name)
+
+    conn
+    |> Map.put(:script_name, configured_script_name)
+    |> Plug.Conn.register_before_send(&prefix_redirect(&1, base_path))
+  end
+
+  defp prefix_redirect(conn, base_path) do
+    case Plug.Conn.get_resp_header(conn, "location") do
+      [location] -> Plug.Conn.put_resp_header(conn, "location", prefix_path(location, base_path))
+      _ -> conn
+    end
+  end
+
+  defp prefix_path(location, base_path) do
+    cond do
+      location == base_path or String.starts_with?(location, base_path <> "/") ->
+        location
+
+      String.starts_with?(location, "/") and not String.starts_with?(location, "//") ->
+        base_path <> location
+
+      true ->
+        location
+    end
+  end
 
   def websocket_url() do
     config!(:websocket_url)

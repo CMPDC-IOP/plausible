@@ -86,7 +86,7 @@ defmodule PlausibleWeb.Plugs.AuthorizeOAuthAPI do
     do: ~s(Bearer resource_metadata="#{resource_metadata_url(resource)}")
 
   defp resource_metadata_url(resource) do
-    "#{PlausibleWeb.Endpoint.url()}/.well-known/oauth-protected-resource" <>
+    "#{PlausibleWeb.URL.base_url()}/.well-known/oauth-protected-resource" <>
       resource.resource_path
   end
 end

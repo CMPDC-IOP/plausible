@@ -24,7 +24,7 @@ defmodule Plausible.OAuth.ProtectedResources do
   def all(), do: Enum.map(resources(), &get_resource_url/1)
 
   @spec get_resource_url(t()) :: String.t()
-  def get_resource_url(resource), do: PlausibleWeb.Endpoint.url() <> resource.resource_path
+  def get_resource_url(resource), do: PlausibleWeb.URL.base_url() <> resource.resource_path
 
   @spec get_by_url(String.t()) :: {:ok, t()} | {:error, :not_found}
   def get_by_url(resource_url) when is_binary(resource_url) do

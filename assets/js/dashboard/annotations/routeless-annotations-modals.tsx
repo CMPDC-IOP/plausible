@@ -1,6 +1,7 @@
 import React from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSiteContext } from '../site-context'
+import { internalApiPath } from '../util/url'
 import { useUserContext } from '../user-context'
 import { get, mutation } from '../api'
 import { useRoutelessModalsContext } from '../navigation/routeless-modals-context'
@@ -35,7 +36,7 @@ export const useGetAnnotations = () => {
     queryKey: ['annotations', { date_range, relative_date }],
     queryFn: async () => {
       const response: Annotation[] = await get(
-        `/api/${encodeURIComponent(site.domain)}/annotations`,
+        internalApiPath(site, '/annotations'),
         // workaround to allow custom params to be defined
         // without passing the whole dashboard state
         {} as unknown as DashboardState,
@@ -71,7 +72,7 @@ export const RoutelessAnnotationModals = () => {
       type
     }: Pick<Annotation, 'id'> & Partial<Pick<Annotation, 'note' | 'type'>>) => {
       const response: Annotation = await mutation(
-        `/api/${encodeURIComponent(site.domain)}/annotations/${id}`,
+        internalApiPath(site, `/annotations/${id}`),
         {
           method: 'PATCH',
           body: {
@@ -92,7 +93,7 @@ export const RoutelessAnnotationModals = () => {
   const createAnnotation = useMutation({
     mutationFn: async (payload: AnnotationPayload) => {
       const response: Annotation = await mutation(
-        `/api/${encodeURIComponent(site.domain)}/annotations`,
+        internalApiPath(site, '/annotations'),
         {
           method: 'POST',
           body: getApiFormattedPayload(payload)
@@ -109,7 +110,7 @@ export const RoutelessAnnotationModals = () => {
   const deleteAnnotation = useMutation({
     mutationFn: async (data: Pick<Annotation, 'id'>) => {
       const response: Annotation = await mutation(
-        `/api/${encodeURIComponent(site.domain)}/annotations/${data.id}`,
+        internalApiPath(site, `/annotations/${data.id}`),
         {
           method: 'DELETE'
         }

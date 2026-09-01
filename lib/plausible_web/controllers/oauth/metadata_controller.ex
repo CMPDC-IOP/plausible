@@ -6,7 +6,7 @@ defmodule PlausibleWeb.OAuth.MetadataController do
   use PlausibleWeb, :controller
 
   alias Plausible.OAuth.ProtectedResources
-  alias PlausibleWeb.Endpoint
+  alias PlausibleWeb.URL
 
   @mcp ProtectedResources.mcp()
 
@@ -18,7 +18,7 @@ defmodule PlausibleWeb.OAuth.MetadataController do
   def mcp_protected_resource(conn, _params) do
     json(conn, %{
       resource: ProtectedResources.get_resource_url(@mcp),
-      authorization_servers: [Endpoint.url()],
+      authorization_servers: [URL.base_url()],
       scopes_supported: @mcp.scopes_supported,
       bearer_methods_supported: ["header"]
     })
@@ -33,9 +33,9 @@ defmodule PlausibleWeb.OAuth.MetadataController do
   """
   def authorization_server(conn, _params) do
     json(conn, %{
-      issuer: Endpoint.url(),
-      authorization_endpoint: Endpoint.url() <> @authorization_endpoint,
-      token_endpoint: Endpoint.url() <> @token_endpoint,
+      issuer: URL.base_url(),
+      authorization_endpoint: URL.url(@authorization_endpoint),
+      token_endpoint: URL.url(@token_endpoint),
       response_types_supported: ["code"],
       grant_types_supported: ["authorization_code", "refresh_token"],
       code_challenge_methods_supported: ["S256"],
