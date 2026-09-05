@@ -108,12 +108,14 @@ defmodule PlausibleWeb.InvitationController do
 
         conn
         |> put_flash(:success, "You have removed the invitation for #{email}")
-        |> redirect(to: ~p"/#{site.domain}/settings/people")
+        |> redirect(to: ~p"/#{PlausibleWeb.SitePath.encode(site.domain)}/settings/people")
 
       {:error, :invitation_not_found} ->
         conn
         |> put_flash(:error, "Invitation missing or already removed")
-        |> redirect(to: ~p"/#{conn.assigns.site.domain}/settings/people")
+        |> redirect(
+          to: ~p"/#{PlausibleWeb.SitePath.encode(conn.assigns.site.domain)}/settings/people"
+        )
     end
   end
 

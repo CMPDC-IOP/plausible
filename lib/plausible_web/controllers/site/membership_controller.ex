@@ -58,7 +58,7 @@ defmodule PlausibleWeb.Site.MembershipController do
           :success,
           "#{email} has been invited to #{site_domain} as #{PlausibleWeb.SiteView.with_indefinite_article("#{invitation.role}")}"
         )
-        |> redirect(to: ~p"/#{site.domain}/settings/people")
+        |> redirect(to: ~p"/#{PlausibleWeb.SitePath.encode(site.domain)}/settings/people")
 
       {:error, :already_a_member} ->
         render(conn, "invite_member_form.html",
@@ -96,7 +96,7 @@ defmodule PlausibleWeb.Site.MembershipController do
 
         conn
         |> put_flash(:error, error_msg)
-        |> redirect(to: ~p"/#{site.domain}/settings/people")
+        |> redirect(to: ~p"/#{PlausibleWeb.SitePath.encode(site.domain)}/settings/people")
     end
   end
 
@@ -123,7 +123,7 @@ defmodule PlausibleWeb.Site.MembershipController do
                guest_membership.role == :viewer do
             stats_path(site.domain)
           else
-            ~p"/#{site.domain}/settings/people"
+            ~p"/#{PlausibleWeb.SitePath.encode(site.domain)}/settings/people"
           end
 
         conn
@@ -136,7 +136,7 @@ defmodule PlausibleWeb.Site.MembershipController do
       {:error, _} ->
         conn
         |> put_flash(:error, "You are not allowed to grant the #{new_role_str} role")
-        |> redirect(to: ~p"/#{site.domain}/settings/people")
+        |> redirect(to: ~p"/#{PlausibleWeb.SitePath.encode(site.domain)}/settings/people")
     end
   end
 
@@ -150,7 +150,7 @@ defmodule PlausibleWeb.Site.MembershipController do
         if user_id == conn.assigns[:current_user].id do
           ~p"/sites"
         else
-          ~p"/#{site.domain}/settings/people"
+          ~p"/#{PlausibleWeb.SitePath.encode(site.domain)}/settings/people"
         end
 
       conn
@@ -165,7 +165,7 @@ defmodule PlausibleWeb.Site.MembershipController do
         :success,
         "User has been removed from #{site.domain}"
       )
-      |> redirect(to: ~p"/#{site.domain}/settings/people")
+      |> redirect(to: ~p"/#{PlausibleWeb.SitePath.encode(site.domain)}/settings/people")
     end
   end
 end

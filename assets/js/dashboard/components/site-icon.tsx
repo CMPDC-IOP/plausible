@@ -5,6 +5,7 @@ import React from 'react'
 import classNames from 'classnames'
 import { useTheme } from '../theme-context'
 import { withBasePath } from '../../base-path'
+import { encodeSiteDomain } from '../util/url'
 
 const siteIconClassName = 'shrink-0 size-5.5 rounded-md'
 
@@ -22,7 +23,7 @@ export const Favicon = ({ domain }: { domain: string }) => {
       aria-hidden="true"
       alt=""
       src={withBasePath(
-        `/favicon/sources/${encodeURIComponent(domain)}?placeholder=site&ui-mode=${mode}`
+        `/favicon/sources/${encodeSiteDomain(domain)}?placeholder=site&ui-mode=${mode}`
       )}
       onError={(e) => {
         const target = e.target as HTMLImageElement

@@ -9,8 +9,8 @@
 
     <.form
       action={
-        (@site.public && ~p"/sites/#{@site.domain}/make-private") ||
-          ~p"/sites/#{@site.domain}/make-public"
+        (@site.public && ~p"/sites/#{PlausibleWeb.SitePath.encode(@site.domain)}/make-private") ||
+          ~p"/sites/#{PlausibleWeb.SitePath.encode(@site.domain)}/make-public"
       }
       aria-label="Make stats publicly available"
       method="post"

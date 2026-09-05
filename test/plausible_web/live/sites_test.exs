@@ -149,7 +149,7 @@ defmodule PlausibleWeb.Live.SitesTest do
 
       {:ok, _lv, html} = live(conn, "/sites")
 
-      assert html =~ ~s|src="/favicon/sources/example.com%2Fdocs"|
+      assert html =~ ~s|src="/favicon/sources/example.com~docs?placeholder=site&amp;ui-mode=light"|
       refute html =~ "https://example.com/docs/favicon.ico"
       refute html =~ ~s|phx-hook="SiteFavicon"|
       refute html =~ "data-sources="
