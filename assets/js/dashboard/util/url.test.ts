@@ -17,7 +17,7 @@ describe('apiPath', () => {
     [
       'example.com/path/is-really/deep',
       '',
-      '/api/stats/example.com%2Fpath%2Fis-really%2Fdeep/'
+      '/api/stats/example.com~path~is-really~deep/'
     ]
   ])(
     'when site.domain is %p and path is %s, should return %s',
@@ -42,20 +42,20 @@ describe('base path', () => {
     const site = { domain: 'example.com/path', shared: false }
 
     expect(apiPath(site, '/query')).toBe(
-      '/plausible/api/stats/example.com%2Fpath/query/'
+      '/plausible/api/stats/example.com~path/query/'
     )
     expect(internalApiPath(site, '/annotations')).toBe(
-      '/plausible/api/example.com%2Fpath/annotations'
+      '/plausible/api/example.com~path/annotations'
     )
-    expect(siteBasePath(site)).toBe('/plausible/example.com%2Fpath')
+    expect(siteBasePath(site)).toBe('/plausible/example.com~path')
     expect(sitePath(site, '/settings/general')).toBe(
-      '/plausible/example.com%2Fpath/settings/general'
+      '/plausible/example.com~path/settings/general'
     )
   })
 
   it('prefixes shared dashboard paths', () => {
-    expect(siteBasePath({ domain: 'example.com', shared: true })).toBe(
-      '/plausible/share/example.com'
+    expect(siteBasePath({ domain: 'example.com/path', shared: true })).toBe(
+      '/plausible/share/example.com~path'
     )
   })
 })
@@ -64,6 +64,7 @@ describe('externalLinkForPage', () => {
   it.each([
     ['example.com', '/about', 'https://example.com/about'],
     ['sub.example.com', '/contact', 'https://sub.example.com/contact'],
+    ['example.com/path', '/contact', 'https://example.com/contact'],
     [
       'example.com',
       '/search?q=test#section',

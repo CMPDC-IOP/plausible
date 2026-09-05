@@ -22,6 +22,8 @@ defmodule PlausibleWeb.Live.Installation do
         _session,
         socket
       ) do
+    domain = PlausibleWeb.SitePath.decode(domain)
+
     site =
       Plausible.Sites.get_for_user!(socket.assigns.current_user, domain,
         roles: [
@@ -367,7 +369,8 @@ defmodule PlausibleWeb.Live.Installation do
            stats_path(assigns.domain, verify_installation: true, flow: assigns.flow)}
 
         assigns.flow == Flows.review() ->
-          {"Back to settings", ~p"/#{assigns.domain}/settings/general"}
+          {"Back to settings",
+           ~p"/#{PlausibleWeb.SitePath.encode(assigns.domain)}/settings/general"}
 
         assigns.flow == Flows.provisioning() ->
           {"Back to sites", ~p"/sites"}

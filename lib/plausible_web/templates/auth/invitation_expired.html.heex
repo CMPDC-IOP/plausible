@@ -2,12 +2,12 @@
   <.auth_container class="flex gap-3 justify-center">
     <.button_link
       :if={Plausible.Auth.check_registration_enabled() == :ok}
-      href={Routes.auth_path(@conn, :register_form)}
+      href={~p"/register"}
       mt?={false}
     >
       Start free trial
     </.button_link>
-    <.button_link href={Routes.auth_path(@conn, :login_form)} theme="secondary" mt?={false}>
+    <.button_link href={~p"/login"} theme="secondary" mt?={false}>
       Sign in
     </.button_link>
   </.auth_container>

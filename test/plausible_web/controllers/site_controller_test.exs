@@ -563,7 +563,7 @@ defmodule PlausibleWeb.SiteControllerTest do
         })
 
       assert redirected_to(conn) ==
-               "/example.com%2Fsome_blog_site/installation?flow="
+               "/example.com~some_blog_site/installation?flow="
     end
 
     test "renders form again when it is a duplicate domain", %{conn: conn} do

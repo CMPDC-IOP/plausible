@@ -118,7 +118,7 @@ defmodule PlausibleWeb.Layouts do
     <.app header?={false} footer?={false} global_notices?={false} flash={@flash}>
       <div class="min-h-screen w-full bg-white dark:bg-gray-900">
         <div class="flex justify-center pt-12 sm:pt-20">
-          <a href={Routes.page_path(PlausibleWeb.Endpoint, :index)}>
+          <a href={~p"/"}>
             <Layout.logo />
           </a>
         </div>

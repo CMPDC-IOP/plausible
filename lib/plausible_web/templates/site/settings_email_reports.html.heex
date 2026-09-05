@@ -2,12 +2,14 @@
   <% email_reports = [
     weekly: %{
       report: @weekly_report,
-      disable_route: ~p"/sites/#{@site.domain}/weekly-report/disable",
-      enable_route: ~p"/sites/#{@site.domain}/weekly-report/enable",
+      disable_route:
+        ~p"/sites/#{PlausibleWeb.SitePath.encode(@site.domain)}/weekly-report/disable",
+      enable_route: ~p"/sites/#{PlausibleWeb.SitePath.encode(@site.domain)}/weekly-report/enable",
       remove_route_fn: fn recipient ->
-        ~p"/sites/#{@site.domain}/weekly-report/recipients/#{recipient}"
+        ~p"/sites/#{PlausibleWeb.SitePath.encode(@site.domain)}/weekly-report/recipients/#{recipient}"
       end,
-      add_route: ~p"/sites/#{@site.domain}/weekly-report/recipients",
+      add_route:
+        ~p"/sites/#{PlausibleWeb.SitePath.encode(@site.domain)}/weekly-report/recipients",
       heading: "Weekly email reports",
       subtitle: "Send weekly analytics reports to as many addresses as you wish.",
       toggle: "Send a weekly email report every Monday",
@@ -15,12 +17,15 @@
     },
     monthly: %{
       report: @monthly_report,
-      disable_route: ~p"/sites/#{@site.domain}/monthly-report/disable",
-      enable_route: ~p"/sites/#{@site.domain}/monthly-report/enable",
+      disable_route:
+        ~p"/sites/#{PlausibleWeb.SitePath.encode(@site.domain)}/monthly-report/disable",
+      enable_route:
+        ~p"/sites/#{PlausibleWeb.SitePath.encode(@site.domain)}/monthly-report/enable",
       remove_route_fn: fn recipient ->
-        ~p"/sites/#{@site.domain}/monthly-report/recipients/#{recipient}"
+        ~p"/sites/#{PlausibleWeb.SitePath.encode(@site.domain)}/monthly-report/recipients/#{recipient}"
       end,
-      add_route: ~p"/sites/#{@site.domain}/monthly-report/recipients",
+      add_route:
+        ~p"/sites/#{PlausibleWeb.SitePath.encode(@site.domain)}/monthly-report/recipients",
       heading: "Monthly email reports",
       subtitle: "Send monthly analytics reports to as many addresses as you wish.",
       toggle: "Send a monthly email report on 1st of the month",
@@ -128,8 +133,8 @@
       for={nil}
       action={
         (meta.notification &&
-           ~p"/sites/#{@site.domain}/traffic-change-notification/#{type}/disable") ||
-          ~p"/sites/#{@site.domain}/traffic-change-notification/#{type}/enable"
+           ~p"/sites/#{PlausibleWeb.SitePath.encode(@site.domain)}/traffic-change-notification/#{type}/disable") ||
+          ~p"/sites/#{PlausibleWeb.SitePath.encode(@site.domain)}/traffic-change-notification/#{type}/enable"
       }
       method="post"
     >
@@ -143,7 +148,9 @@
       :if={meta.notification}
       class="mt-4"
       for={Plausible.Site.TrafficChangeNotification.changeset(meta.notification, %{})}
-      action={~p"/sites/#{@site.domain}/traffic-change-notification/#{type}"}
+      action={
+        ~p"/sites/#{PlausibleWeb.SitePath.encode(@site.domain)}/traffic-change-notification/#{type}"
+      }
     >
       <div class="flex items-end gap-x-4">
         <PlausibleWeb.Live.Components.Form.input
@@ -180,7 +187,7 @@
             <.delete_button
               method="delete"
               href={
-                ~p"/sites/#{@site.domain}/traffic-change-notification/#{type}/recipients/#{recipient}"
+                ~p"/sites/#{PlausibleWeb.SitePath.encode(@site.domain)}/traffic-change-notification/#{type}/recipients/#{recipient}"
               }
             />
           </.td>
@@ -193,7 +200,9 @@
         :let={f}
         for={@conn}
         class="mt-4"
-        action={~p"/sites/#{@site.domain}/traffic-change-notification/#{type}/recipients"}
+        action={
+          ~p"/sites/#{PlausibleWeb.SitePath.encode(@site.domain)}/traffic-change-notification/#{type}/recipients"
+        }
       >
         <div class="flex items-end gap-x-4">
           <PlausibleWeb.Live.Components.Form.input
