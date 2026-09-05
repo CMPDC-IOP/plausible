@@ -122,7 +122,11 @@ defmodule PlausibleWeb.CustomerSupport.Team.Components.Sites do
           <.td>
             <div class="flex items-center">
               <img
-                src={PlausibleWeb.URL.path("favicon/sources/#{site.domain}")}
+                src={
+                  PlausibleWeb.URL.path(
+                    "favicon/sources/#{PlausibleWeb.SitePath.encode_segment(site.domain)}"
+                  )
+                }
                 onerror={
                   "this.onerror=null; this.src='" <>
                     PlausibleWeb.URL.path("favicon/placeholders/source") <> "';"
@@ -154,7 +158,7 @@ defmodule PlausibleWeb.CustomerSupport.Team.Components.Sites do
           <.td>
             <.styled_link
               new_tab={true}
-              href={~p"/#{site.domain}/settings/general"}
+              href={~p"/#{PlausibleWeb.SitePath.encode(site.domain)}/settings/general"}
             >
               Settings
             </.styled_link>

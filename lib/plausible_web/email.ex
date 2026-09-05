@@ -481,7 +481,7 @@ defmodule PlausibleWeb.Email do
       label: label,
       link:
         PlausibleWeb.URL.url(
-          "#{URI.encode_www_form(site_import.site.domain)}?__team=#{team.identifier}"
+          "#{PlausibleWeb.SitePath.encode_segment(site_import.site.domain)}?__team=#{team.identifier}"
         ),
       user: user,
       success: true
@@ -511,7 +511,9 @@ defmodule PlausibleWeb.Email do
       end
 
     download_url =
-      url(~p"/#{site.domain}/download/export?#{[__team: site.team.identifier]}")
+      url(
+        ~p"/#{PlausibleWeb.SitePath.encode(site.domain)}/download/export?#{[__team: site.team.identifier]}"
+      )
 
     priority_email()
     |> to(user)

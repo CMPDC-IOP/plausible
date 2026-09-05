@@ -1,6 +1,6 @@
 <% options = account_settings_sidebar(assigns) %>
 <div class="container pt-6">
-  <.styled_link class="font-medium text-sm" href={Routes.site_path(@conn, :index)}>
+  <.styled_link class="font-medium text-sm" href={~p"/sites"}>
     ← Back to sites
   </.styled_link>
   <div class="pt-0.5 pb-4 border-b border-gray-200 dark:border-gray-750">

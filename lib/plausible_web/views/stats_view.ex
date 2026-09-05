@@ -59,12 +59,13 @@ defmodule PlausibleWeb.StatsView do
   ugly URLs, e.g. `https://plausible.io/café.com` transforms into
   `https://plausible.io/caf%C3%A9.com`.
 
-  This function encodes only the slash (`/`) character from the site's domain.
+  This function preserves readable Unicode while replacing a slash (`/`) in the
+  site's domain with the site-path token.
 
   ## Examples
 
      iex> PlausibleWeb.StatsView.pretty_stats_url(%Plausible.Site{domain: "user.gittea.io/repo"})
-     "http://localhost:8000/user.gittea.io%2Frepo"
+     "http://localhost:8000/user.gittea.io~repo"
 
      iex> PlausibleWeb.StatsView.pretty_stats_url(%Plausible.Site{domain: "anakin.test"})
      "http://localhost:8000/anakin.test"
@@ -74,7 +75,7 @@ defmodule PlausibleWeb.StatsView do
 
   """
   def pretty_stats_url(%Plausible.Site{domain: domain}) when is_binary(domain) do
-    pretty_domain = String.replace(domain, "/", "%2F")
+    pretty_domain = PlausibleWeb.SitePath.encode(domain)
     "#{plausible_url()}/#{pretty_domain}"
   end
 end

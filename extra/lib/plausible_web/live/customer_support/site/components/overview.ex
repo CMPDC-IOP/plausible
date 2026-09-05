@@ -27,7 +27,7 @@ defmodule PlausibleWeb.CustomerSupport.Site.Components.Overview do
 
           <.styled_link
             new_tab={true}
-            href={~p"/#{@site.domain}/settings/general"}
+            href={~p"/#{PlausibleWeb.SitePath.encode(@site.domain)}/settings/general"}
           >
             Settings
           </.styled_link>

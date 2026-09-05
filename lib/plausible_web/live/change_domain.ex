@@ -24,6 +24,8 @@ defmodule PlausibleWeb.Live.ChangeDomain do
         _session,
         socket
       ) do
+    domain = PlausibleWeb.SitePath.decode(domain)
+
     site =
       Plausible.Sites.get_for_user!(socket.assigns.current_user, domain,
         roles: [
@@ -90,7 +92,7 @@ defmodule PlausibleWeb.Live.ChangeDomain do
           </:item>
           <:item>
             Return to
-            <.styled_link href={~p"/#{@site.domain}/settings/general"}>
+            <.styled_link href={~p"/#{PlausibleWeb.SitePath.encode(@site.domain)}/settings/general"}>
               Site Settings
             </.styled_link>
           </:item>
@@ -124,7 +126,7 @@ defmodule PlausibleWeb.Live.ChangeDomain do
           </:item>
           <:item>
             Return to
-            <.styled_link href={~p"/#{@site.domain}/settings/general"}>
+            <.styled_link href={~p"/#{PlausibleWeb.SitePath.encode(@site.domain)}/settings/general"}>
               Site Settings
             </.styled_link>
           </:item>
@@ -241,7 +243,7 @@ defmodule PlausibleWeb.Live.ChangeDomain do
         continuous tracking. The easiest way to fix that is to simply follow your
         <.styled_link
           new_tab
-          href={~p"/#{@site.domain}/installation"}
+          href={~p"/#{PlausibleWeb.SitePath.encode(@site.domain)}/installation"}
         >
           installation instructions
         </.styled_link>
@@ -319,6 +321,8 @@ defmodule PlausibleWeb.Live.ChangeDomain do
     {:noreply,
      socket
      |> assign(site: updated_site)
-     |> push_patch(to: ~p"/#{updated_site.domain}/change-domain/success")}
+     |> push_patch(
+       to: ~p"/#{PlausibleWeb.SitePath.encode(updated_site.domain)}/change-domain/success"
+     )}
   end
 end

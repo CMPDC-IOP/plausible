@@ -58,7 +58,7 @@ defmodule PlausibleWeb.Dogfood do
   # a string replace in `payload.u`.
   defp domain_to_replace(assigns) do
     if not is_nil(assigns[:site]) and assigns[:demo] != true do
-      URI.encode_www_form(assigns.site.domain)
+      PlausibleWeb.SitePath.encode_segment(assigns.site.domain)
     end
   end
 

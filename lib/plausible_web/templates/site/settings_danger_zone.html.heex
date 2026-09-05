@@ -12,7 +12,7 @@
     <:title>Reset stats</:title>
     <:subtitle>Reset all stats but keep the site configuration intact.</:subtitle>
     <.button_link
-      href={~p"/#{@site.domain}/stats"}
+      href={~p"/#{PlausibleWeb.SitePath.encode(@site.domain)}/stats"}
       method="delete"
       data-confirm="Resetting the stats cannot be reversed. Are you sure?"
       theme="danger"
