@@ -168,7 +168,7 @@ defmodule PlausibleWeb.Favicon do
         send_placeholder(conn, name)
 
       "/favicon/sources/" <> domain ->
-        domain = URI.decode_www_form(domain)
+        domain = domain |> URI.decode_www_form() |> PlausibleWeb.SitePath.decode()
 
         case cached_favicon(
                domain,
@@ -432,6 +432,7 @@ defmodule PlausibleWeb.Favicon do
     |> send_resp(200, response.body)
     |> halt()
   end
+
   defp prevent_javascript_execution(conn) do
     conn
     |> put_resp_header("content-security-policy", "script-src 'none'")

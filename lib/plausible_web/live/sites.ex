@@ -199,7 +199,7 @@ defmodule PlausibleWeb.Live.Sites do
         </p>
         <div class="flex flex-col sm:flex-row gap-3 mt-6">
           <.button_link
-            href={Routes.site_path(@socket, :new, flow: PlausibleWeb.Flows.provisioning())}
+            href={~p"/sites/new?#{[flow: PlausibleWeb.Flows.provisioning()]}"}
             theme="primary"
           >
             <Heroicons.plus class="size-4" /> Add website
@@ -617,7 +617,7 @@ defmodule PlausibleWeb.Live.Sites do
     <.tooltip centered?={true} hover_only?={true} interactive?={false}>
       <:tooltip_content>Site settings</:tooltip_content>
       <.button_link
-        href={~p"/#{@site.domain}/settings/general"}
+        href={~p"/#{PlausibleWeb.SitePath.encode(@site.domain)}/settings/general"}
         theme="ghost"
         size="xs"
         icon?={true}
@@ -808,11 +808,11 @@ defmodule PlausibleWeb.Live.Sites do
       assign(assigns,
         light_src:
           PlausibleWeb.URL.path(
-            "favicon/sources/#{URI.encode_www_form(assigns.domain)}?placeholder=site&ui-mode=light"
+            "favicon/sources/#{PlausibleWeb.SitePath.encode_segment(assigns.domain)}?placeholder=site&ui-mode=light"
           ),
         dark_src:
           PlausibleWeb.URL.path(
-            "favicon/sources/#{URI.encode_www_form(assigns.domain)}?placeholder=site&ui-mode=dark"
+            "favicon/sources/#{PlausibleWeb.SitePath.encode_segment(assigns.domain)}?placeholder=site&ui-mode=dark"
           )
       )
 
