@@ -175,15 +175,17 @@ defmodule PlausibleWeb.FaviconTest do
         trusted_favicon_fetcher: trusted_fetcher
       )
 
-    conn =
-      conn(:get, "/favicon/sources/intranet.example%2Fdocs")
-      |> Favicon.call(opts)
+    for domain_path <- ["intranet.example~docs", "intranet.example%2Fdocs"] do
+      conn =
+        conn(:get, "/favicon/sources/" <> domain_path)
+        |> Favicon.call(opts)
 
-    assert conn.status == 200
-    assert conn.resp_body == "private favicon"
-    assert Plug.Conn.get_resp_header(conn, "location") == []
-    assert_receive {:trusted_favicon_fetch, "https://intranet.example/docs/"}
-    assert_receive {:trusted_favicon_fetch, "https://intranet.example/docs/favicon.png"}
+      assert conn.status == 200
+      assert conn.resp_body == "private favicon"
+      assert Plug.Conn.get_resp_header(conn, "location") == []
+      assert_receive {:trusted_favicon_fetch, "https://intranet.example/docs/"}
+      assert_receive {:trusted_favicon_fetch, "https://intranet.example/docs/favicon.png"}
+    end
   end
 
   test "ignores a trusted page's cross-host favicon declaration", %{plug_opts: plug_opts} do

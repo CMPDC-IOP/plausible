@@ -106,7 +106,7 @@ defmodule Plausible.Workers.TrafficChangeNotifier do
     installation_link =
       if site_member? and Plausible.Sites.regular?(site) do
         url(
-          ~p"/#{site.domain}/installation?#{[flow: PlausibleWeb.Flows.review(), __team: site.team.identifier]}"
+          ~p"/#{PlausibleWeb.SitePath.encode(site.domain)}/installation?#{[flow: PlausibleWeb.Flows.review(), __team: site.team.identifier]}"
         )
       end
 

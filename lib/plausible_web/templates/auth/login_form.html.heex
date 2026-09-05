@@ -1,6 +1,6 @@
 <Layouts.auth heading={@heading} subtitle={@subtitle} flash={@flash}>
   <.auth_container>
-    <.form :let={f} for={@conn} action={Routes.auth_path(@conn, :login)} class="flex flex-col gap-y-6">
+    <.form :let={f} for={@conn} action={~p"/login"} class="flex flex-col gap-y-6">
       <div class="flex flex-col gap-y-2">
         <label for={f[:email].id} class="text-sm font-semibold text-gray-800 dark:text-gray-200">
           Email
@@ -31,7 +31,7 @@
           mt?={false}
         />
         <.styled_link
-          href={Routes.auth_path(@conn, :password_reset_request_form)}
+          href={~p"/password/request-reset"}
           class="text-sm absolute top-0 right-0"
         >
           Forgot password?
@@ -54,7 +54,7 @@
             :if={Plausible.Auth.check_registration_enabled() == :ok}
             class="text-sm text-center text-gray-500 dark:text-gray-400"
           >
-            New here? <.styled_link href={Routes.auth_path(@conn, :register_form)}>Create your account</.styled_link>
+            New here? <.styled_link href={~p"/register"}>Create your account</.styled_link>
           </p>
 
           <%= on_ee do %>

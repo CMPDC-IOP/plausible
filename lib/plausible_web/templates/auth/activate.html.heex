@@ -34,7 +34,7 @@
       <div class="mt-6 flex flex-col gap-y-2 text-sm text-gray-500 dark:text-gray-400 text-center">
         <p>
           Didn't receive it?
-          <.styled_link href={Routes.auth_path(@conn, :request_activation_code)} method="post">Resend code</.styled_link>
+          <.styled_link href={~p"/activate/request-code"} method="post">Resend code</.styled_link>
           or
           <%= if @has_any_memberships? do %>
             <.styled_link method="post" href={~p"/settings/security/email/cancel"}>
@@ -43,7 +43,7 @@
           <% else %>
             <.styled_link
               method="delete"
-              href={Routes.auth_path(@conn, :delete_me, redirect: Routes.auth_path(@conn, :register_form))}
+              href={~p"/me?#{[redirect: ~p"/register"]}"}
             >
               change email
             </.styled_link>
@@ -70,7 +70,7 @@
         <.button_link
           method="post"
           class="w-full"
-          href={Routes.auth_path(@conn, :request_activation_code)}
+          href={~p"/activate/request-code"}
         >
           Send activation code
         </.button_link>
@@ -88,7 +88,7 @@
         <% else %>
           <.styled_link
             method="delete"
-            href={Routes.auth_path(@conn, :delete_me, redirect: Routes.auth_path(@conn, :register_form))}
+            href={~p"/me?#{[redirect: ~p"/register"]}"}
           >
             change email
           </.styled_link>

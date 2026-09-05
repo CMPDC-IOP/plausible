@@ -198,7 +198,7 @@ defmodule PlausibleWeb.Live.Sites do
         </p>
         <div class="flex flex-col sm:flex-row gap-3 mt-6">
           <.button_link
-            href={Routes.site_path(@socket, :new, flow: PlausibleWeb.Flows.provisioning())}
+            href={~p"/sites/new?#{[flow: PlausibleWeb.Flows.provisioning()]}"}
             theme="primary"
             mt?={false}
           >
@@ -636,7 +636,7 @@ defmodule PlausibleWeb.Live.Sites do
             :if={@can_manage?}
             id={"#{@dropdown_id}-item-1"}
             as={&link/1}
-            href={~p"/#{@site.domain}/settings/general"}
+            href={~p"/#{PlausibleWeb.SitePath.encode(@site.domain)}/settings/general"}
           >
             <Heroicons.cog_6_tooth class={PrimaDropdown.dropdown_item_icon_class()} /> Settings
           </PrimaDropdown.dropdown_item>
@@ -813,11 +813,11 @@ defmodule PlausibleWeb.Live.Sites do
       assign(assigns,
         light_src:
           PlausibleWeb.URL.path(
-            "favicon/sources/#{URI.encode_www_form(assigns.domain)}?placeholder=site&ui-mode=light"
+            "favicon/sources/#{PlausibleWeb.SitePath.encode_segment(assigns.domain)}?placeholder=site&ui-mode=light"
           ),
         dark_src:
           PlausibleWeb.URL.path(
-            "favicon/sources/#{URI.encode_www_form(assigns.domain)}?placeholder=site&ui-mode=dark"
+            "favicon/sources/#{PlausibleWeb.SitePath.encode_segment(assigns.domain)}?placeholder=site&ui-mode=dark"
           )
       )
 

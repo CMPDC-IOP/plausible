@@ -29,14 +29,14 @@ defmodule PlausibleWeb.VerifiedRoutes do
     Phoenix.VerifiedRoutes.unverified_path(
       PlausibleWeb.Endpoint,
       PlausibleWeb.Router,
-      "/#{encode_segment(domain)}",
+      "/#{encode_site_segment(domain)}",
       params
     )
   end
 
   def shared_stats_path(domain, params \\ [], star_path \\ nil)
       when is_binary(domain) and byte_size(domain) > 0 do
-    path = "/share/#{encode_segment(domain)}/"
+    path = "/share/#{encode_site_segment(domain)}/"
 
     path =
       if is_list(star_path) and star_path != [] do
@@ -56,9 +56,17 @@ defmodule PlausibleWeb.VerifiedRoutes do
   def stats_url(domain, params \\ []) when is_binary(domain) and byte_size(domain) > 0 do
     Phoenix.VerifiedRoutes.unverified_url(
       PlausibleWeb.Endpoint,
-      "/#{URI.encode_www_form(domain)}",
+      "/#{encode_site_segment(domain)}",
       params
     )
+  end
+
+  # Proxies may normalize percent-encoded slashes, so site domains use the
+  # reversible PlausibleWeb.SitePath encoding instead of %2F.
+  defp encode_site_segment(data) do
+    data
+    |> Phoenix.Param.to_param()
+    |> PlausibleWeb.SitePath.encode_segment()
   end
 
   defp encode_path([str | _] = path) when is_binary(str) do

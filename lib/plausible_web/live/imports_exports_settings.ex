@@ -105,7 +105,7 @@ defmodule PlausibleWeb.Live.ImportsExportsSettings do
             </.button_link>
             <.button_link
               disabled={@import_in_progress? or @at_maximum?}
-              href={Routes.site_path(@socket, :csv_import, @site.domain)}
+              href={~p"/#{PlausibleWeb.SitePath.encode(@site.domain)}/settings/import"}
               mt?={false}
             >
               Import from CSV
@@ -129,7 +129,7 @@ defmodule PlausibleWeb.Live.ImportsExportsSettings do
           </.button_link>
           <.button_link
             disabled={@import_in_progress? or @at_maximum?}
-            href={Routes.site_path(@socket, :csv_import, @site.domain)}
+            href={~p"/#{PlausibleWeb.SitePath.encode(@site.domain)}/settings/import"}
             mt?={false}
           >
             Import from CSV
@@ -192,7 +192,9 @@ defmodule PlausibleWeb.Live.ImportsExportsSettings do
               </.td>
               <.td actions>
                 <.delete_button
-                  href={Routes.site_path(@socket, :forget_import, @site.domain, entry.site_import.id)}
+                  href={
+                    ~p"/#{PlausibleWeb.SitePath.encode(@site.domain)}/settings/forget-import/#{entry.site_import.id}"
+                  }
                   method="delete"
                   data-confirm="Are you sure you want to delete this import?"
                 />

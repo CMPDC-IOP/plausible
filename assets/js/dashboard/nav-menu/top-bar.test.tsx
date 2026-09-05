@@ -40,11 +40,15 @@ beforeEach(() => {
 
 test('user can open and close site switcher', async () => {
   mockAPI.get('/api/sites', {
-    data: [domain, 'example.com', 'blog.example.com', 'aççented.ca'].map(
-      (domain) => ({
-        domain
-      })
-    )
+    data: [
+      domain,
+      'example.com',
+      'blog.example.com',
+      'nested.example.com/path',
+      'aççented.ca'
+    ].map((domain) => ({
+      domain
+    }))
   })
 
   render(<TopBar showCurrentVisitors={false} />, {
@@ -77,7 +81,11 @@ test('user can open and close site switcher', async () => {
       { text: ['dummy.site', '1'], href: '#' },
       { text: ['example.com', '2'], href: `/example.com` },
       { text: ['blog.example.com', '3'], href: `/blog.example.com` },
-      { text: ['aççented.ca', '4'], href: `/a%C3%A7%C3%A7ented.ca` }
+      {
+        text: ['nested.example.com/path', '4'],
+        href: '/nested.example.com~path'
+      },
+      { text: ['aççented.ca', '5'], href: `/a%C3%A7%C3%A7ented.ca` }
     ].map((l) => ({ ...l, text: l.text.join('') }))
   )
 
@@ -85,6 +93,30 @@ test('user can open and close site switcher', async () => {
   await userEvent.click(toggleSiteSwitcher)
   expect(screen.queryByTestId('sitemenu')).not.toBeInTheDocument()
   expect(screen.queryAllByRole('menuitem')).toEqual([])
+})
+
+test('site switcher uses the route token for nested site favicons and settings', async () => {
+  const nestedDomain = 'nested.example.com/path'
+
+  render(<TopBar showCurrentVisitors={false} />, {
+    wrapper: (props) => (
+      <TestContextProviders siteOptions={{ domain: nestedDomain }} {...props} />
+    )
+  })
+
+  const toggleSiteSwitcher = screen.getByRole('button', {
+    name: nestedDomain
+  })
+  expect(toggleSiteSwitcher.querySelector('img')).toHaveAttribute(
+    'src',
+    '/favicon/sources/nested.example.com~path'
+  )
+
+  await userEvent.click(toggleSiteSwitcher)
+  expect(screen.getByRole('link', { name: 'Site settings' })).toHaveAttribute(
+    'href',
+    '/nested.example.com~path/settings/general'
+  )
 })
 
 test('site switcher links to a site needing verification with verify_installation and flow params', async () => {

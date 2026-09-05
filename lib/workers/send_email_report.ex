@@ -67,7 +67,7 @@ defmodule Plausible.Workers.SendEmailReport do
 
   defp unsubscribe_link(site, email, interval) do
     PlausibleWeb.URL.url(
-      "sites/#{URI.encode_www_form(site.domain)}/#{interval}-report/unsubscribe?email=#{email}"
+      "sites/#{PlausibleWeb.SitePath.encode_segment(site.domain)}/#{interval}-report/unsubscribe?email=#{email}"
     )
   end
 
