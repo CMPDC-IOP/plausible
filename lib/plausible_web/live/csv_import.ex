@@ -221,7 +221,7 @@ defmodule PlausibleWeb.Live.CSVImport do
       )
 
     redirect_to =
-      ~p"/#{site.domain}/settings/imports-exports"
+      ~p"/#{PlausibleWeb.SitePath.encode(site.domain)}/settings/imports-exports"
 
     {:noreply, redirect(socket, to: redirect_to)}
   end
