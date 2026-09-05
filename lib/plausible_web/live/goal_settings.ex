@@ -81,7 +81,7 @@ defmodule PlausibleWeb.Live.GoalSettings do
           <%= on_ee do %>
             <p :if={Plausible.Sites.regular?(@site)} data-test-id="setup-funnels-cta">
               You can also
-              <.styled_link href={~p"/#{@domain}/settings/funnels"}>
+              <.styled_link href={~p"/#{PlausibleWeb.SitePath.encode(@domain)}/settings/funnels"}>
                 compose goals into funnels.
               </.styled_link>
             </p>

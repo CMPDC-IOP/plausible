@@ -4,6 +4,7 @@ defmodule PlausibleWeb.Router do
   import Phoenix.LiveView.Router
 
   pipeline :browser do
+    plug PlausibleWeb.Plugs.DecodeSiteDomain
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
@@ -33,6 +34,7 @@ defmodule PlausibleWeb.Router do
   end
 
   pipeline :shared_link do
+    plug PlausibleWeb.Plugs.DecodeSiteDomain
     plug :accepts, ["html"]
     plug PlausibleWeb.Plugs.SecureEmbedHeaders
     plug PlausibleWeb.Plugs.NoRobots
@@ -63,12 +65,14 @@ defmodule PlausibleWeb.Router do
   end
 
   pipeline :api do
+    plug PlausibleWeb.Plugs.DecodeSiteDomain
     plug :accepts, ["json"]
     plug :fetch_session
     plug PlausibleWeb.AuthPlug
   end
 
   pipeline :internal_stats_api do
+    plug PlausibleWeb.Plugs.DecodeSiteDomain
     plug :accepts, ["json"]
     plug :fetch_session
     plug PlausibleWeb.AuthPlug
@@ -89,6 +93,7 @@ defmodule PlausibleWeb.Router do
   end
 
   pipeline :public_api do
+    plug PlausibleWeb.Plugs.DecodeSiteDomain
     plug :accepts, ["json"]
   end
 

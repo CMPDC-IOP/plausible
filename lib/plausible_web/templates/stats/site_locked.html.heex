@@ -37,7 +37,9 @@
             </p>
             <p class="mt-4 text-sm text-gray-600 dark:text-gray-300">
               You can configure your
-              <.styled_link href={~p"/#{@site.domain}/settings/general"}>
+              <.styled_link href={
+                ~p"/#{PlausibleWeb.SitePath.encode(@site.domain)}/settings/general"
+              }>
                 site settings
               </.styled_link>
               but your access to the dashboard is restricted.
