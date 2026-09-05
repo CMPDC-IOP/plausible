@@ -122,7 +122,11 @@ defmodule PlausibleWeb.CustomerSupport.Team.Components.Sites do
           <.td>
             <div class="flex items-center">
               <img
-                src={PlausibleWeb.URL.path("favicon/sources/#{site.domain}")}
+                src={
+                  PlausibleWeb.URL.path(
+                    "favicon/sources/#{PlausibleWeb.SitePath.encode_segment(site.domain)}"
+                  )
+                }
                 onerror={
                   "this.onerror=null; this.src='" <>
                     PlausibleWeb.URL.path("favicon/placeholders/source") <> "';"
@@ -146,7 +150,14 @@ defmodule PlausibleWeb.CustomerSupport.Team.Components.Sites do
           <.td>
             <.styled_link
               new_tab={true}
-              href={Routes.stats_path(PlausibleWeb.Endpoint, :stats, site.domain, [])}
+              href={
+                Routes.stats_path(
+                  PlausibleWeb.Endpoint,
+                  :stats,
+                  PlausibleWeb.SitePath.encode(site.domain),
+                  []
+                )
+              }
             >
               Dashboard
             </.styled_link>
@@ -154,7 +165,14 @@ defmodule PlausibleWeb.CustomerSupport.Team.Components.Sites do
           <.td>
             <.styled_link
               new_tab={true}
-              href={Routes.site_path(PlausibleWeb.Endpoint, :settings_general, site.domain, [])}
+              href={
+                Routes.site_path(
+                  PlausibleWeb.Endpoint,
+                  :settings_general,
+                  PlausibleWeb.SitePath.encode(site.domain),
+                  []
+                )
+              }
             >
               Settings
             </.styled_link>

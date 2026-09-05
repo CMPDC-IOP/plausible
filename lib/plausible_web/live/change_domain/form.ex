@@ -35,7 +35,13 @@ defmodule PlausibleWeb.Live.ChangeDomain.Form do
           class="mt-1 flex text-sm text-red-500 leading-4.5 text-pretty"
         >
           You already own this site. See its&nbsp;
-          <.styled_link href={Routes.site_path(@socket, :settings_general, @already_owned_domain)}>
+          <.styled_link href={
+            Routes.site_path(
+              @socket,
+              :settings_general,
+              PlausibleWeb.SitePath.encode(@already_owned_domain)
+            )
+          }>
             settings
           </.styled_link>
         </p>

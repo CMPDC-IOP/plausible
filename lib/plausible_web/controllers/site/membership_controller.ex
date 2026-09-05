@@ -58,7 +58,9 @@ defmodule PlausibleWeb.Site.MembershipController do
           :success,
           "#{email} has been invited to #{site_domain} as #{PlausibleWeb.SiteView.with_indefinite_article("#{invitation.role}")}"
         )
-        |> redirect(to: Routes.site_path(conn, :settings_people, site.domain))
+        |> redirect(
+          to: Routes.site_path(conn, :settings_people, PlausibleWeb.SitePath.encode(site.domain))
+        )
 
       {:error, :already_a_member} ->
         render(conn, "invite_member_form.html",
@@ -89,7 +91,9 @@ defmodule PlausibleWeb.Site.MembershipController do
 
         conn
         |> put_flash(:error, error_msg)
-        |> redirect(to: Routes.site_path(conn, :settings_people, site.domain))
+        |> redirect(
+          to: Routes.site_path(conn, :settings_people, PlausibleWeb.SitePath.encode(site.domain))
+        )
     end
   end
 
@@ -114,9 +118,9 @@ defmodule PlausibleWeb.Site.MembershipController do
         redirect_target =
           if guest_membership.team_membership.user_id == current_user.id and
                guest_membership.role == :viewer do
-            Routes.stats_path(conn, :stats, site.domain, [])
+            Routes.stats_path(conn, :stats, PlausibleWeb.SitePath.encode(site.domain), [])
           else
-            Routes.site_path(conn, :settings_people, site.domain)
+            Routes.site_path(conn, :settings_people, PlausibleWeb.SitePath.encode(site.domain))
           end
 
         conn
@@ -129,7 +133,9 @@ defmodule PlausibleWeb.Site.MembershipController do
       {:error, _} ->
         conn
         |> put_flash(:error, "You are not allowed to grant the #{new_role_str} role")
-        |> redirect(to: Routes.site_path(conn, :settings_people, site.domain))
+        |> redirect(
+          to: Routes.site_path(conn, :settings_people, PlausibleWeb.SitePath.encode(site.domain))
+        )
     end
   end
 
@@ -143,7 +149,7 @@ defmodule PlausibleWeb.Site.MembershipController do
         if user_id == conn.assigns[:current_user].id do
           Routes.site_path(conn, :index)
         else
-          Routes.site_path(conn, :settings_people, site.domain)
+          Routes.site_path(conn, :settings_people, PlausibleWeb.SitePath.encode(site.domain))
         end
 
       conn
@@ -158,7 +164,9 @@ defmodule PlausibleWeb.Site.MembershipController do
         :success,
         "User has been removed from #{site.domain}"
       )
-      |> redirect(to: Routes.site_path(conn, :settings_people, site.domain))
+      |> redirect(
+        to: Routes.site_path(conn, :settings_people, PlausibleWeb.SitePath.encode(site.domain))
+      )
     end
   end
 end

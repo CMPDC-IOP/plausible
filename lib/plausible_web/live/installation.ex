@@ -22,6 +22,8 @@ defmodule PlausibleWeb.Live.Installation do
         _session,
         socket
       ) do
+    domain = PlausibleWeb.SitePath.decode(domain)
+
     site =
       Plausible.Sites.get_for_user!(socket.assigns.current_user, domain,
         roles: [
@@ -364,14 +366,21 @@ defmodule PlausibleWeb.Live.Installation do
       cond do
         assigns.return_to == "dashboard" ->
           {"Back to dashboard",
-           Routes.stats_path(PlausibleWeb.Endpoint, :stats, assigns.domain,
+           Routes.stats_path(
+             PlausibleWeb.Endpoint,
+             :stats,
+             PlausibleWeb.SitePath.encode(assigns.domain),
              verify_installation: true,
              flow: assigns.flow
            )}
 
         assigns.flow == Flows.review() ->
           {"Back to settings",
-           Routes.site_path(PlausibleWeb.Endpoint, :settings_general, assigns.domain)}
+           Routes.site_path(
+             PlausibleWeb.Endpoint,
+             :settings_general,
+             PlausibleWeb.SitePath.encode(assigns.domain)
+           )}
 
         assigns.flow == Flows.provisioning() ->
           {"Back to sites", Routes.site_path(PlausibleWeb.Endpoint, :index)}
@@ -420,12 +429,12 @@ defmodule PlausibleWeb.Live.Installation do
 
     destination =
       on_ee do
-        Routes.stats_path(socket, :stats, domain,
+        Routes.stats_path(socket, :stats, PlausibleWeb.SitePath.encode(domain),
           verify_installation: true,
           flow: socket.assigns.flow
         )
       else
-        Routes.stats_path(socket, :stats, domain, [])
+        Routes.stats_path(socket, :stats, PlausibleWeb.SitePath.encode(domain), [])
       end
 
     {:noreply, redirect(socket, to: destination)}

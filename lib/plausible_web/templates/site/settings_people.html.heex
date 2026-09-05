@@ -18,7 +18,13 @@
     <.filter_bar :if={@site_role in [:owner, :admin]} filtering_enabled?={false}>
       <.button_link
         mt?={false}
-        href={Routes.membership_path(@conn, :invite_member_form, @site.domain)}
+        href={
+          Routes.membership_path(
+            @conn,
+            :invite_member_form,
+            PlausibleWeb.SitePath.encode(@site.domain)
+          )
+        }
       >
         Invite new guest
       </.button_link>
@@ -70,7 +76,7 @@
                         Routes.membership_path(
                           @conn,
                           :update_role_by_user,
-                          @site.domain,
+                          PlausibleWeb.SitePath.encode(@site.domain),
                           membership.user.id,
                           "editor"
                         )
@@ -88,7 +94,7 @@
                         Routes.membership_path(
                           @conn,
                           :update_role_by_user,
-                          @site.domain,
+                          PlausibleWeb.SitePath.encode(@site.domain),
                           membership.user.id,
                           "viewer"
                         )
@@ -107,7 +113,7 @@
                         Routes.membership_path(
                           @conn,
                           :remove_member_by_user,
-                          @site.domain,
+                          PlausibleWeb.SitePath.encode(@site.domain),
                           membership.user.id
                         )
                       }
@@ -150,7 +156,7 @@
               Routes.invitation_path(
                 @conn,
                 :remove_invitation,
-                @site.domain,
+                PlausibleWeb.SitePath.encode(@site.domain),
                 invitation.invitation_id
               )
             }

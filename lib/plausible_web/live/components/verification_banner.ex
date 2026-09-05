@@ -199,7 +199,10 @@ defmodule PlausibleWeb.Live.Components.VerificationBanner do
             :if={not @offer_custom_url_input?}
             mt?={false}
             href={
-              Routes.site_path(PlausibleWeb.Endpoint, :installation, @domain,
+              Routes.site_path(
+                PlausibleWeb.Endpoint,
+                :installation,
+                PlausibleWeb.SitePath.encode(@domain),
                 flow: @flow,
                 return_to: "dashboard"
               )
@@ -270,7 +273,10 @@ defmodule PlausibleWeb.Live.Components.VerificationBanner do
 
   defp review_installation_link_sentence(assigns) do
     review_installation_url =
-      Routes.site_path(PlausibleWeb.Endpoint, :installation, assigns.domain,
+      Routes.site_path(
+        PlausibleWeb.Endpoint,
+        :installation,
+        PlausibleWeb.SitePath.encode(assigns.domain),
         flow: assigns.flow,
         return_to: "dashboard"
       )

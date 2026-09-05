@@ -23,7 +23,13 @@
 
         <.button_link
           theme="danger"
-          href={Routes.site_path(@conn, :delete_google_auth, @site.domain)}
+          href={
+            Routes.site_path(
+              @conn,
+              :delete_google_auth,
+              PlausibleWeb.SitePath.encode(@site.domain)
+            )
+          }
           method="delete"
         >
           Unlink Google account
@@ -52,7 +58,13 @@
               :let={f}
               for={Plausible.Site.GoogleAuth.changeset(@site.google_auth)}
               class="max-w-xs"
-              action={Routes.site_path(@conn, :update_google_auth, @site.domain)}
+              action={
+                Routes.site_path(
+                  @conn,
+                  :update_google_auth,
+                  PlausibleWeb.SitePath.encode(@site.domain)
+                )
+              }
             >
               <div class="mt-2 w-full">
                 {live_render(@conn, PlausibleWeb.Live.PlainCombo,

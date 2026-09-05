@@ -9,8 +9,9 @@
 
     <.form
       action={
-        (@site.public && Routes.site_path(@conn, :make_private, @site.domain)) ||
-          Routes.site_path(@conn, :make_public, @site.domain)
+        (@site.public &&
+           Routes.site_path(@conn, :make_private, PlausibleWeb.SitePath.encode(@site.domain))) ||
+          Routes.site_path(@conn, :make_public, PlausibleWeb.SitePath.encode(@site.domain))
       }
       aria-label="Make stats publicly available"
       method="post"
@@ -20,7 +21,7 @@
         Make stats publicly available on
         <.unstyled_link
           class="text-indigo-500"
-          href={Routes.stats_path(@conn, :stats, @site.domain, [])}
+          href={Routes.stats_path(@conn, :stats, PlausibleWeb.SitePath.encode(@site.domain), [])}
         >
           {PlausibleWeb.StatsView.pretty_stats_url(@site)}
         </.unstyled_link>

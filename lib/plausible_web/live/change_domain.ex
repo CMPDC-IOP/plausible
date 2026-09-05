@@ -25,6 +25,8 @@ defmodule PlausibleWeb.Live.ChangeDomain do
         _session,
         socket
       ) do
+    domain = PlausibleWeb.SitePath.decode(domain)
+
     site =
       Plausible.Sites.get_for_user!(socket.assigns.current_user, domain,
         roles: [
@@ -91,7 +93,9 @@ defmodule PlausibleWeb.Live.ChangeDomain do
           </:item>
           <:item>
             Return to
-            <.styled_link href={Routes.site_path(@socket, :settings_general, @site.domain)}>
+            <.styled_link href={
+              Routes.site_path(@socket, :settings_general, PlausibleWeb.SitePath.encode(@site.domain))
+            }>
               Site Settings
             </.styled_link>
           </:item>
@@ -125,7 +129,9 @@ defmodule PlausibleWeb.Live.ChangeDomain do
           </:item>
           <:item>
             Return to
-            <.styled_link href={Routes.site_path(@socket, :settings_general, @site.domain)}>
+            <.styled_link href={
+              Routes.site_path(@socket, :settings_general, PlausibleWeb.SitePath.encode(@site.domain))
+            }>
               Site Settings
             </.styled_link>
           </:item>
@@ -242,7 +248,13 @@ defmodule PlausibleWeb.Live.ChangeDomain do
         continuous tracking. The easiest way to fix that is to simply follow your
         <.styled_link
           new_tab
-          href={Routes.site_path(PlausibleWeb.Endpoint, :installation, @site.domain)}
+          href={
+            Routes.site_path(
+              PlausibleWeb.Endpoint,
+              :installation,
+              PlausibleWeb.SitePath.encode(@site.domain)
+            )
+          }
         >
           installation instructions
         </.styled_link>
@@ -320,6 +332,8 @@ defmodule PlausibleWeb.Live.ChangeDomain do
     {:noreply,
      socket
      |> assign(site: updated_site)
-     |> push_patch(to: Routes.site_path(socket, :success, updated_site.domain))}
+     |> push_patch(
+       to: Routes.site_path(socket, :success, PlausibleWeb.SitePath.encode(updated_site.domain))
+     )}
   end
 end

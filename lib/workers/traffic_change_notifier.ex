@@ -80,7 +80,12 @@ defmodule Plausible.Workers.TrafficChangeNotifier do
   defp send_spike_notification(recipient_email, site, stats) do
     dashboard_link =
       if site_member?(site, recipient_email) do
-        Routes.stats_url(PlausibleWeb.Endpoint, :stats, site.domain, []) <>
+        Routes.stats_url(
+          PlausibleWeb.Endpoint,
+          :stats,
+          PlausibleWeb.SitePath.encode(site.domain),
+          []
+        ) <>
           "?__team=#{site.team.identifier}"
       end
 
@@ -100,15 +105,24 @@ defmodule Plausible.Workers.TrafficChangeNotifier do
 
     dashboard_link =
       if site_member? do
-        Routes.stats_url(PlausibleWeb.Endpoint, :stats, site.domain, []) <>
+        Routes.stats_url(
+          PlausibleWeb.Endpoint,
+          :stats,
+          PlausibleWeb.SitePath.encode(site.domain),
+          []
+        ) <>
           "?__team=#{site.team.identifier}"
       end
 
     installation_link =
       if site_member? and Plausible.Sites.regular?(site) do
-        Routes.site_url(PlausibleWeb.Endpoint, :installation, site.domain,
+        Routes.site_url(
+          PlausibleWeb.Endpoint,
+          :installation,
+          PlausibleWeb.SitePath.encode(site.domain),
           flow: PlausibleWeb.Flows.review()
-        ) <> "&__team=#{site.team.identifier}"
+        ) <>
+          "&__team=#{site.team.identifier}"
       end
 
     template =

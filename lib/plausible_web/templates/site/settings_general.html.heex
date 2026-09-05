@@ -8,7 +8,9 @@
         <.settings_row label="Site domain" docs="change-domain-name">
           <span class="text-gray-800 dark:text-gray-200">{@site.domain}</span>
           <.styled_link
-            href={Routes.site_path(@conn, :change_domain, @site.domain)}
+            href={
+              Routes.site_path(@conn, :change_domain, PlausibleWeb.SitePath.encode(@site.domain))
+            }
             aria-label="Change domain"
             class="text-sm"
           >
@@ -19,7 +21,13 @@
         <.settings_divider />
       <% end %>
 
-      <.form :let={f} for={@changeset} action={Routes.site_path(@conn, :update_settings, @site.domain)}>
+      <.form
+        :let={f}
+        for={@changeset}
+        action={
+          Routes.site_path(@conn, :update_settings, PlausibleWeb.SitePath.encode(@site.domain))
+        }
+      >
         <.settings_row
           label="Reporting timezone"
           for={f[:timezone].id}

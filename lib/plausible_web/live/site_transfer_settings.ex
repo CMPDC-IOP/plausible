@@ -277,7 +277,10 @@ defmodule PlausibleWeb.Live.SiteTransferSettings do
         {:noreply,
          socket
          |> put_flash(:success, "Site transfer request has been sent to #{email}")
-         |> redirect(to: Routes.site_path(socket, :settings_people, site.domain))}
+         |> redirect(
+           to:
+             Routes.site_path(socket, :settings_people, PlausibleWeb.SitePath.encode(site.domain))
+         )}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         message =

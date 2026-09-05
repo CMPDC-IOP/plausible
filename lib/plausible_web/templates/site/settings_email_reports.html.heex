@@ -35,8 +35,9 @@
     <.form
       for={nil}
       action={
-        (meta.report && Routes.site_path(@conn, meta.disable_route, @site.domain)) ||
-          Routes.site_path(@conn, meta.enable_route, @site.domain)
+        (meta.report &&
+           Routes.site_path(@conn, meta.disable_route, PlausibleWeb.SitePath.encode(@site.domain))) ||
+          Routes.site_path(@conn, meta.enable_route, PlausibleWeb.SitePath.encode(@site.domain))
       }
       method="post"
     >
@@ -72,7 +73,7 @@
                 Routes.site_path(
                   @conn,
                   meta.remove_route,
-                  @site.domain,
+                  PlausibleWeb.SitePath.encode(@site.domain),
                   recipient
                 )
               }
@@ -85,7 +86,9 @@
         :let={f}
         class="mt-4"
         for={@conn}
-        action={Routes.site_path(@conn, meta.add_route, @site.domain)}
+        action={
+          Routes.site_path(@conn, meta.add_route, PlausibleWeb.SitePath.encode(@site.domain))
+        }
         method="post"
       >
         <div class="flex items-end gap-x-2">
@@ -134,8 +137,18 @@
       for={nil}
       action={
         (meta.notification &&
-           Routes.site_path(@conn, :disable_traffic_change_notification, @site.domain, type)) ||
-          Routes.site_path(@conn, :enable_traffic_change_notification, @site.domain, type)
+           Routes.site_path(
+             @conn,
+             :disable_traffic_change_notification,
+             PlausibleWeb.SitePath.encode(@site.domain),
+             type
+           )) ||
+          Routes.site_path(
+            @conn,
+            :enable_traffic_change_notification,
+            PlausibleWeb.SitePath.encode(@site.domain),
+            type
+          )
       }
       method="post"
     >
@@ -149,7 +162,14 @@
       :if={meta.notification}
       class="mt-4"
       for={Plausible.Site.TrafficChangeNotification.changeset(meta.notification, %{})}
-      action={Routes.site_path(@conn, :update_traffic_change_notification, @site.domain, type)}
+      action={
+        Routes.site_path(
+          @conn,
+          :update_traffic_change_notification,
+          PlausibleWeb.SitePath.encode(@site.domain),
+          type
+        )
+      }
     >
       <div class="flex items-end gap-x-4">
         <PlausibleWeb.Live.Components.Form.input
@@ -189,7 +209,7 @@
                 Routes.site_path(
                   @conn,
                   :remove_traffic_change_notification_recipient,
-                  @site.domain,
+                  PlausibleWeb.SitePath.encode(@site.domain),
                   type,
                   recipient
                 )
@@ -209,7 +229,7 @@
           Routes.site_path(
             @conn,
             :add_traffic_change_notification_recipient,
-            @site.domain,
+            PlausibleWeb.SitePath.encode(@site.domain),
             type
           )
         }

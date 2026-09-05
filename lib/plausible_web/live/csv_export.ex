@@ -107,7 +107,9 @@ defmodule PlausibleWeb.Live.CSVExport do
         <.download
           storage={@storage}
           export={@export}
-          href={Routes.site_path(@socket, :download_export, @site.domain)}
+          href={
+            Routes.site_path(@socket, :download_export, PlausibleWeb.SitePath.encode(@site.domain))
+          }
         />
     <% end %>
     """
@@ -228,7 +230,12 @@ defmodule PlausibleWeb.Live.CSVExport do
           socket
           |> put_flash(:error, "There is no data to export")
           |> redirect(
-            to: Routes.site_path(socket, :settings_imports_exports, socket.assigns.site.domain)
+            to:
+              Routes.site_path(
+                socket,
+                :settings_imports_exports,
+                PlausibleWeb.SitePath.encode(socket.assigns.site.domain)
+              )
           )
       end
 

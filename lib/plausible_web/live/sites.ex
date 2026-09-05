@@ -437,7 +437,14 @@ defmodule PlausibleWeb.Live.Sites do
       class="relative row-span-2"
     >
       <.unstyled_link
-        href={Routes.stats_path(PlausibleWeb.Endpoint, :stats, @consolidated_view.domain, [])}
+        href={
+          Routes.stats_path(
+            PlausibleWeb.Endpoint,
+            :stats,
+            PlausibleWeb.SitePath.encode(@consolidated_view.domain),
+            []
+          )
+        }
         class="flex flex-col justify-between gap-6 h-full bg-white p-5 dark:bg-gray-900 rounded-md shadow-sm cursor-pointer hover:shadow-md transition-shadow duration-150"
       >
         <div class="flex flex-col flex-1 justify-between gap-y-5">
@@ -564,7 +571,7 @@ defmodule PlausibleWeb.Live.Sites do
           Routes.stats_path(
             PlausibleWeb.Endpoint,
             :stats,
-            @site.domain,
+            PlausibleWeb.SitePath.encode(@site.domain),
             if(@needs_verification?,
               do: [verify_installation: true, flow: PlausibleWeb.Flows.provisioning()],
               else: []
@@ -638,7 +645,13 @@ defmodule PlausibleWeb.Live.Sites do
             :if={@can_manage?}
             id={"#{@dropdown_id}-item-1"}
             as={&link/1}
-            href={Routes.site_path(PlausibleWeb.Endpoint, :settings_general, @site.domain)}
+            href={
+              Routes.site_path(
+                PlausibleWeb.Endpoint,
+                :settings_general,
+                PlausibleWeb.SitePath.encode(@site.domain)
+              )
+            }
           >
             <Heroicons.cog_6_tooth class={PrimaDropdown.dropdown_item_icon_class()} /> Settings
           </PrimaDropdown.dropdown_item>
@@ -815,11 +828,11 @@ defmodule PlausibleWeb.Live.Sites do
       assign(assigns,
         light_src:
           PlausibleWeb.URL.path(
-            "favicon/sources/#{URI.encode_www_form(assigns.domain)}?placeholder=site&ui-mode=light"
+            "favicon/sources/#{PlausibleWeb.SitePath.encode_segment(assigns.domain)}?placeholder=site&ui-mode=light"
           ),
         dark_src:
           PlausibleWeb.URL.path(
-            "favicon/sources/#{URI.encode_www_form(assigns.domain)}?placeholder=site&ui-mode=dark"
+            "favicon/sources/#{PlausibleWeb.SitePath.encode_segment(assigns.domain)}?placeholder=site&ui-mode=dark"
           )
       )
 

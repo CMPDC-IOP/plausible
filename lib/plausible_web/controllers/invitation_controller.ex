@@ -38,7 +38,9 @@ defmodule PlausibleWeb.InvitationController do
         if site do
           conn
           |> put_flash(:success, "You now have access to #{site.domain}")
-          |> redirect(to: Routes.stats_path(conn, :stats, site.domain, []))
+          |> redirect(
+            to: Routes.stats_path(conn, :stats, PlausibleWeb.SitePath.encode(site.domain), [])
+          )
         else
           conn
           |> put_flash(:success, "You now have access to \"#{team.name}\" team")
@@ -108,12 +110,21 @@ defmodule PlausibleWeb.InvitationController do
 
         conn
         |> put_flash(:success, "You have removed the invitation for #{email}")
-        |> redirect(to: Routes.site_path(conn, :settings_people, site.domain))
+        |> redirect(
+          to: Routes.site_path(conn, :settings_people, PlausibleWeb.SitePath.encode(site.domain))
+        )
 
       {:error, :invitation_not_found} ->
         conn
         |> put_flash(:error, "Invitation missing or already removed")
-        |> redirect(to: Routes.site_path(conn, :settings_people, conn.assigns.site.domain))
+        |> redirect(
+          to:
+            Routes.site_path(
+              conn,
+              :settings_people,
+              PlausibleWeb.SitePath.encode(conn.assigns.site.domain)
+            )
+        )
     end
   end
 

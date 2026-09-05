@@ -327,8 +327,8 @@ defmodule PlausibleWeb.Live.CustomerSupport.TeamsTest do
         html = render(lv)
         text = text(html)
 
-        assert element_exists?(html, ~s|a[href="/primary.example.com%2Ftest"]|)
-        assert element_exists?(html, ~s|a[href="/primary.example.com%2Ftest/settings/general"]|)
+        assert element_exists?(html, ~s|a[href="/primary.example.com~test"]|)
+        assert element_exists?(html, ~s|a[href="/primary.example.com~test/settings/general"]|)
 
         assert text =~ "primary.example.com/test"
         assert text =~ "secondary.example.com"

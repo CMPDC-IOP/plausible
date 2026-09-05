@@ -618,9 +618,17 @@ defmodule PlausibleWeb.AuthController do
       {:ok, %{site: site, context: context}} ->
         redirect_url =
           if context == "import" do
-            Routes.site_path(conn, :settings_imports_exports, site.domain)
+            Routes.site_path(
+              conn,
+              :settings_imports_exports,
+              PlausibleWeb.SitePath.encode(site.domain)
+            )
           else
-            Routes.site_path(conn, :settings_integrations, site.domain)
+            Routes.site_path(
+              conn,
+              :settings_integrations,
+              PlausibleWeb.SitePath.encode(site.domain)
+            )
           end
 
         cond do
@@ -681,7 +689,10 @@ defmodule PlausibleWeb.AuthController do
   defp google_import_callback(conn, site, token_data, expires_at) do
     redirect(conn,
       to:
-        Routes.google_analytics_path(conn, :property_form, site.domain,
+        Routes.google_analytics_path(
+          conn,
+          :property_form,
+          PlausibleWeb.SitePath.encode(site.domain),
           access_token: Map.fetch!(token_data, "access_token"),
           refresh_token: Map.fetch!(token_data, "refresh_token"),
           expires_at: NaiveDateTime.to_iso8601(expires_at)
@@ -723,7 +734,10 @@ defmodule PlausibleWeb.AuthController do
       conflict_target: :site_id
     )
 
-    redirect(conn, to: Routes.site_path(conn, :settings_integrations, site.domain))
+    redirect(conn,
+      to:
+        Routes.site_path(conn, :settings_integrations, PlausibleWeb.SitePath.encode(site.domain))
+    )
   end
 
   defp check_callback_site_permission(site, current_user) do

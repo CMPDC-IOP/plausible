@@ -1,26 +1,30 @@
 import { PlausibleSite } from '../site-context'
 import { withBasePath } from '../../base-path'
 
+export function encodeSiteDomain(domain: string): string {
+  return encodeURIComponent(domain.replace(/\//g, '~'))
+}
+
 export function apiPath(
   site: Pick<PlausibleSite, 'domain'>,
   path = ''
 ): string {
-  return withBasePath(`/api/stats/${encodeURIComponent(site.domain)}${path}/`)
+  return withBasePath(`/api/stats/${encodeSiteDomain(site.domain)}${path}/`)
 }
 
 export function internalApiPath(
   site: Pick<PlausibleSite, 'domain'>,
   path = ''
 ): string {
-  return withBasePath(`/api/${encodeURIComponent(site.domain)}${path}`)
+  return withBasePath(`/api/${encodeSiteDomain(site.domain)}${path}`)
 }
 
 export function siteBasePath(
   site: Pick<PlausibleSite, 'domain' | 'shared'>
 ): string {
   const route = site.shared
-    ? `/share/${encodeURIComponent(site.domain)}`
-    : `/${encodeURIComponent(site.domain)}`
+    ? `/share/${encodeSiteDomain(site.domain)}`
+    : `/${encodeSiteDomain(site.domain)}`
 
   return withBasePath(route)
 }
